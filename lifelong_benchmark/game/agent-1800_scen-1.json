@@ -1,0 +1,8 @@
+{
+    "mapFile": "maps/ht_mansion_n.map",
+    "agentFile": "agents/agent-1800_scen-1.agents",
+    "teamSize": 1800,
+    "taskFile": "tasks/agent-1800_scen-1.tasks",
+    "numTasksReveal": 1,
+    "taskAssignmentStrategy": "roundrobin"
+}
