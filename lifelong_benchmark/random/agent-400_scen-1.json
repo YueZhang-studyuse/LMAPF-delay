@@ -4,5 +4,6 @@
     "teamSize": 400,
     "taskFile": "tasks/agent-400_scen-1.tasks",
     "numTasksReveal": 1,
-    "taskAssignmentStrategy": "roundrobin"
+    "taskAssignmentStrategy": "roundrobin",
+    "delayFile":"delay/random-delay-0.05-1.txt"
 }
