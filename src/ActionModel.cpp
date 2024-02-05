@@ -120,7 +120,6 @@ void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<Stat
 {
     int from = prev[agent].location;
     int to = next[agent].location;
-    //cout<<"check for agent "<<agent<<"from "<<from<<" to "<<to<<endl;
 
     if (delays[agent]) //getting delaied directly, cannot make this move
     {
