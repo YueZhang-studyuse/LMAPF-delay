@@ -81,3 +81,64 @@ bool ActionModel::is_valid(const vector<State>& prev, const vector<Action> & act
 
     return true;
 }
+
+vector<State> ActionModel::result_states_with_delays(const vector<State>& prev, const vector<Action> & action, const vector<bool> & delays) //simple mcp with only one step
+{
+    unordered_map<int,bool> simulated_agents; //to store agents that already simulated and can make move or not
+    vector<list<int>> orders;
+    orders.resize(grid.map.size());
+    for(size_t i = 0 ; i < prev.size(); i ++)
+    {
+        orders[prev[i].location].push_back(i);
+    }
+
+    vector<State> next(prev.size());
+    for (size_t i = 0 ; i < prev.size(); i ++)
+    {
+        next[i] = result_state(prev[i], action[i]); 
+        orders[next[i].location].push_back(i);
+    }
+
+    for (size_t i = 0 ; i < next.size(); i++)
+    {
+        if (simulated_agents.find(i) != simulated_agents.end())
+            continue;
+        mcp_simulate(i,prev,next,orders,simulated_agents,delays);
+    }
+    for (size_t i = 0 ; i < next.size(); i++)
+    {
+        if (!simulated_agents[i])
+            next[i].location = prev[i].location;
+    }
+    return next;
+}
+
+void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<State>& next, vector<list<int>> orders, unordered_map<int,bool> simulated_agents,const vector<bool> & delays)
+{
+    int from = prev[agent].location;
+    int to = next[agent].location;
+    if (delays[agent]) //getting delaied directly, cannot make this move
+    {
+        simulated_agents[agent] = false; //also do not clear the order because we wait
+        return;
+    }
+    if (orders[to].front() == agent) //do not delaied and can make the move directly 
+    {
+        simulated_agents[agent] = true;
+        if (orders[from].front() != agent)
+        {
+            cout<<"wrong first order"<<endl;
+        }
+        orders[from].pop_front(); //clear from
+        return;
+    }
+    if (orders[to].front() != agent && simulated_agents.find(orders[to].front())!= simulated_agents.end()) //the occupied agents simulated already
+    {
+        simulated_agents[agent] = false;
+        return;
+    }
+    if (orders[to].front() != agent && simulated_agents.find(orders[to].front())== simulated_agents.end()) //the occupied agents not simulated yet
+    {
+        mcp_simulate(orders[to].front(),prev,next,orders,simulated_agents,delays);
+    }
+}

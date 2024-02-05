@@ -389,9 +389,9 @@ void LNS::checkReplan()
 
     initial_collision = false;
 
-    for (auto& agent : agents)
+    for (auto& agent : agents) //also include delaied agent
     {
-        if (agent.path.empty())
+        if (agent.path.empty() || agent.path.front().location != agent.path_planner->start_location)
         {
             neighbor.agents.emplace_back(agent.id);
             agent.path.clear();
@@ -1162,17 +1162,17 @@ bool LNS::loadPaths(vector<list<int>> paths)
         }
         //path_table.insertPath(agent_id, agents[agent_id].path);
         initial_sum_of_costs+=agents[agent_id].path.size()-1;
-        if (agents[agent_id].path.front().location != agents[agent_id].path_planner->start_location)
-        {
-            cerr << "Agent " << agent_id <<"'s path starts at " << agents[agent_id].path.front().location
-            << "=(" << instance.getColCoordinate(agents[agent_id].path.front().location)
-            << "," << instance.getRowCoordinate(agents[agent_id].path.front().location)
-            << "), which is different from its start location " << agents[agent_id].path_planner->start_location << endl
-            << "=(" << instance.getColCoordinate(agents[agent_id].path_planner->start_location)
-            << "," << instance.getRowCoordinate(agents[agent_id].path_planner->start_location)
-            << ")" << endl;
-            exit(-1);
-        }
+        // if (agents[agent_id].path.front().location != agents[agent_id].path_planner->start_location)
+        // {
+        //     cerr << "Agent " << agent_id <<"'s path starts at " << agents[agent_id].path.front().location
+        //     << "=(" << instance.getColCoordinate(agents[agent_id].path.front().location)
+        //     << "," << instance.getRowCoordinate(agents[agent_id].path.front().location)
+        //     << "), which is different from its start location " << agents[agent_id].path_planner->start_location << endl
+        //     << "=(" << instance.getColCoordinate(agents[agent_id].path_planner->start_location)
+        //     << "," << instance.getRowCoordinate(agents[agent_id].path_planner->start_location)
+        //     << ")" << endl;
+        //     exit(-1);
+        // }
     }
     has_initial_solution = true;
     return true;

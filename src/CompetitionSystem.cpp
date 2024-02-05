@@ -29,7 +29,9 @@ list<Task> BaseSystem::move(vector<Action>& actions)
         actions = std::vector<Action>(num_of_agents, Action::WA);
     }
 
-    curr_states = model->result_states(curr_states, actions);
+    //curr_states = model->result_states(curr_states, actions);
+    curr_states = model->result_states_with_delays(curr_states, actions,simulation_delay[curr_states[0].timestep]);
+
     // agents do not move
     for (int k = 0; k < num_of_agents; k++)
     {
