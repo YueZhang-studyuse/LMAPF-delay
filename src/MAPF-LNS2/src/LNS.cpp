@@ -393,6 +393,10 @@ void LNS::checkReplan()
     {
         if (agent.path.empty() || agent.path.front().location != agent.path_planner->start_location)
         {
+            if (agent.path.front().location != agent.path_planner->start_location)
+            {
+                cout<<"replan for agent "<<agent.id<<" due to delaies"<<endl;
+            }
             neighbor.agents.emplace_back(agent.id);
             agent.path.clear();
         }
