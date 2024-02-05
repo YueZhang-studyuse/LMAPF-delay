@@ -15,6 +15,8 @@ public:
     int num_tasks_reveal = 1;
     Logger* logger = nullptr;
 
+    vector<vector<bool>> simulation_delay;
+
 	BaseSystem(Grid &grid, MAPFPlanner* planner, ActionModel* model):
         map(grid), planner(planner), env(planner->env), model(model)
     {}
@@ -36,6 +38,8 @@ public:
     void set_plan_time_limit(int limit){plan_time_limit = limit;};
     void set_preprocess_time_limit(int limit){preprocess_time_limit = limit;};
     void set_logger(Logger* logger){this->logger = logger;}
+
+    void set_delay(vector<vector<bool>> delay) {this->simulation_delay = delay;}
 
 	void simulate(int simulation_time);
     //vector<Action> plan();

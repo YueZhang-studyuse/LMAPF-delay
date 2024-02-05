@@ -50,7 +50,7 @@ int main(int argc, char **argv)
         ("output,o", po::value<std::string>()->default_value("./test.json"), "output file name")
         ("outputSimple", po::value<bool>()->default_value(false), "output file name")
         ("evaluationMode", po::value<bool>()->default_value(false), "evaluate an existing output file")
-        ("simulationTime", po::value<int>()->default_value(5000), "run simulation")
+        ("simulationTime", po::value<int>()->default_value(1000), "run simulation")
         ("fileStoragePath", po::value<std::string>()->default_value(""), "the path to the storage path")
         ("planTimeLimit", po::value<int>()->default_value(1), "the time limit for planner in seconds")
         ("preprocessTimeLimit", po::value<int>()->default_value(INT_MAX), "the time limit for preprocessing in seconds")
@@ -129,6 +129,7 @@ int main(int argc, char **argv)
 
     std::vector<int> agents = read_int_vec(base_folder + read_param_json<std::string>(data, "agentFile"), team_size);
     std::vector<int> tasks = read_int_vec(base_folder + read_param_json<std::string>(data, "taskFile"));
+
     std::cout << agents.size() << " agents and " << tasks.size() << " tasks"<< std::endl;
     if (agents.size() > tasks.size())
         logger->log_warning("Not enough tasks for robots (number of tasks < team size)");
@@ -161,6 +162,10 @@ int main(int argc, char **argv)
     system_ptr->set_logger(logger);
     system_ptr->set_plan_time_limit(vm["planTimeLimit"].as<int>());
     system_ptr->set_preprocess_time_limit(vm["preprocessTimeLimit"].as<int>());
+
+    vector<vector<bool>> delays = read_int_delay(base_folder + read_param_json<std::string>(data, "delayFile"), team_size);
+    system_ptr->set_delay(delays);
+
 
     system_ptr->set_num_tasks_reveal(read_param_json<int>(data, "numTasksReveal", 1));
 

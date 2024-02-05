@@ -134,6 +134,52 @@ inline std::vector<int> read_int_vec(string fname)
 	return res;
 }
 
+inline std::vector<vector<bool>> read_int_delay(string fname, int team_size)
+{
+    std::vector<vector<bool>> res;
+	string line;
+	std::ifstream myfile(fname.c_str());
+	if (!myfile.is_open()) return {};
+
+	getline(myfile, line);
+    while (!myfile.eof() && line[0] == '#') {
+        getline(myfile, line);
+    }
+
+    boost::char_separator<char> sep(",");
+    boost::tokenizer<boost::char_separator<char>> tok(line, sep);
+    boost::tokenizer<boost::char_separator<char>>::iterator beg = tok.begin();
+
+    int max_team_size = atoi((*beg).c_str());
+    if (max_team_size < team_size)
+    {
+        std::cerr<<"Input file wrong, no enough agents in agent file";
+        exit (-1);
+    }
+
+    res.resize(team_size);
+    // My benchmark
+    for (int i = 0; i < team_size; i++)
+    {
+        boost::tokenizer<boost::char_separator<char>>::iterator beg;
+        getline(myfile, line);
+        while (!myfile.eof() && line[0] == '#')
+        {
+            getline(myfile, line);
+        }
+        boost::tokenizer< boost::char_separator<char> > tok(line,sep);
+        beg = tok.begin();
+        for (;beg != tok.end();beg++)
+        {
+            //int p = atoi((*beg).c_str());
+            res[i].push_back(atoi((*beg).c_str()));
+        }
+    }
+    myfile.close();
+
+	return res;
+}
+
 
 template <typename T>
 T read_param_json(nlohmann::json& data, std::string name)
