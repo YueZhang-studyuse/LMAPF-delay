@@ -144,6 +144,12 @@ void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<Stat
         simulated_agents[agent] = false;
         return;
     }
+    else
+    {
+        cout<<"mcp result delay "<<agent<<" due to "<<orders[to].front()<<endl;
+        simulated_agents[agent] = false;
+        return;
+    }
     //no recursive now
     // if (orders[to].front() != agent && simulated_agents.find(orders[to].front())== simulated_agents.end()) //the occupied agents not simulated yet
     // {
