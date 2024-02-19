@@ -23,7 +23,7 @@ void SimulateMCP::simulate(vector<AgentPath*>& paths, const vector<bool> & delay
     cout<<"Start "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
 
     for (int t = 0; !unfinished_agents.empty(); t++) {
-        //cout<<"Similate t = "<<t<<endl;
+        cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
 
@@ -73,7 +73,10 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
 
     int i = *p;
 
-    //cout <<"work on agent "<<i<<endl;
+    // if (delay[i])
+    //     cout<<"delaied "<<i<<endl;
+
+    //cout <<"work on agent "<<i<<" at "<<t<<endl;
     if (paths_copy[i].size() == t + 2)  // we have already made the movement decision for the agent
     {
         ++p;
@@ -89,12 +92,12 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
         {
             assert(copy_mcp[loc].front().count(i)>0);
 
-            if (t <= window_size)
-            {
-                paths_copy[i].push_back(paths_copy[i].back());
-                ++p;
-                return false;
-            }
+            // if (t <= window_size)
+            // {
+            //     paths_copy[i].push_back(paths_copy[i].back());
+            //     ++p;
+            //     return false;
+            // }
             copy_mcp[loc].front().erase(i);
             if (copy_mcp[loc].front().empty())
                 copy_mcp[loc].pop_front();
@@ -110,11 +113,11 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
     }
 
     //check delay here
-    if (t == 1 && delay[i]) //getting delaied at timestep 1 (current implementation for window = 1 only)
+    if (t == 0 && delay[i]) //getting delaied at timestep 0->1 (current implementation for window = 1 only)
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
-        //cout<<"delaied"<<endl;
+        //cout<<"find delaied"<<endl;
         return false;
     }
 
@@ -195,6 +198,8 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
                 
                 succ = moveAgent(paths_copy, paths, p2, t, delay);  
             }
+            // if (t==0 && delay[first_agent])
+            //     cout<<"delaied "<<first_agent<<endl;
 
             
             if (!succ)

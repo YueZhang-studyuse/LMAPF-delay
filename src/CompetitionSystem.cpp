@@ -51,6 +51,7 @@ list<Task> BaseSystem::move(vector<Action>& actions)
     {
         //agents[i].resize(2); //current implement for commit window = 1
         agents[i][1].location = curr_states[i].location;
+        //cout<<agents[i][0].location<<"->"<<agents[i][1].location<<endl;
     }
     //curr_states = model->result_states_with_delays(curr_states, actions,delay);
     SimulateMCP postmcp(map.map.size(),1);
