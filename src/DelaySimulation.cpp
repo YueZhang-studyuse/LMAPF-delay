@@ -109,17 +109,19 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
         }
     }
 
+    //check delay here
+    if (copy_agent_time[i]  > 0 && delay[i]) //getting delaied at timestep 1 (current implementation for window = 1 only)
+    {
+        paths_copy[i].push_back(paths_copy[i].back());
+        ++p;
+        return false;
+    }
+
 
     // check mcp to determine whether the agent should move or wait
     int loc = paths[i]->at(no_wait_time[i][copy_agent_time[i]]).location;
     int previous = paths[i]->at(no_wait_time[i][copy_agent_time[i] - 1]).location;
     assert(!copy_mcp[loc].empty());
-
-    //check delay here
-    if (copy_agent_time[i]  > 0 && delay[i]) //getting delaied at timestep 1 (current implementation for window = 1 only)
-    {
-        return false;
-    }
 
 
     if (copy_mcp[previous].begin()->count(i) > 0 && copy_mcp[loc].front().count(i)>0)
