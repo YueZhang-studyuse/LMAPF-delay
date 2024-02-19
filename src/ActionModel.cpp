@@ -116,7 +116,7 @@ vector<State> ActionModel::result_states_with_delays(const vector<State>& prev, 
     return next;
 }
 
-void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<State>& next, vector<list<int>> & orders, unordered_map<int,bool> & simulated_agents,const vector<bool> & delays)
+bool ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<State>& next, vector<list<int>> & orders, unordered_map<int,bool> & simulated_agents,const vector<bool> & delays)
 {
     int from = prev[agent].location;
     int to = next[agent].location;
@@ -125,7 +125,7 @@ void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<Stat
     {
         cout<<"mcp delay "<<agent<<endl;
         simulated_agents[agent] = false; //also do not clear the order because we wait
-        return;
+        return false;
     }
     if (orders[to].front() == agent) //do not delaied and can make the move directly 
     {
@@ -136,24 +136,37 @@ void ActionModel::mcp_simulate(int agent, const vector<State>& prev, vector<Stat
             cout<<"wrong first order"<<endl;
         }
         orders[from].pop_front(); //clear from
-        return;
+        return true;
     }
     if (orders[to].front() != agent && simulated_agents.find(orders[to].front())!= simulated_agents.end()) //the occupied agents simulated already
     {
         cout<<"mcp result delay "<<agent<<" due to "<<orders[to].front()<<endl;
         simulated_agents[agent] = false;
-        return;
-    }
-    else
-    {
-        cout<<"mcp result delay "<<agent<<" due to "<<orders[to].front()<<endl;
-        simulated_agents[agent] = false;
-        return;
+        return false;
     }
     //no recursive now
-    // if (orders[to].front() != agent && simulated_agents.find(orders[to].front())== simulated_agents.end()) //the occupied agents not simulated yet
+    // else
     // {
-    //     //cout<<"mcp recursive"<<endl;
-    //     mcp_simulate(orders[to].front(),prev,next,orders,simulated_agents,delays);
+    //     cout<<"mcp result delay "<<agent<<" due to "<<orders[to].front()<<endl;
+    //     simulated_agents[agent] = false;
+    //     return;
     // }
+    if (orders[to].front() != agent && simulated_agents.find(orders[to].front())== simulated_agents.end()) //the occupied agents not simulated yet
+    {
+        //pretend this agent can move
+        cout<<"mcp recursive from agent "<<agent<<" to "<<orders[to].front()<<endl;
+        orders[from].pop_front(); //clear from
+        auto succ = mcp_simulate(orders[to].front(),prev,next,orders,simulated_agents,delays);
+        if (succ)
+        {
+            simulated_agents[agent] = true;
+            return true;
+        }
+        else
+        {
+            simulated_agents[agent] = false;
+            orders[from].push_back(agent);
+            return false;
+        }
+    }
 }

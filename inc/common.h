@@ -12,6 +12,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/tokenizer.hpp>
 #include "nlohmann/json.hpp"
+#include <set>
 
 using boost::heap::fibonacci_heap;
 using boost::heap::compare;
@@ -20,7 +21,7 @@ using boost::unordered_map;
 
 //got the error error: no member named 'set' in namespace 'std' in my machine
 //so I have a quick check to see we do not use this in our program, and I just delete this for easy debug
-//using std::set;
+using std::set;
 using std::vector;
 using std::tuple;
 using std::deque;
@@ -37,12 +38,13 @@ using std::min;
 using std::priority_queue;
 using std::shared_ptr;
 
-//#include <boost/graph/adjacency_list.hpp>
-//typedef boost::adjacency_list_traits<int, int, boost::undirectedS > confilctGraph_t;
-//typedef confilctGraph_t::vertex_descriptor vertex_t;
-//typedef confilctGraph_t::edge_descriptor edge_t;
+struct AgentPathEntry
+{
+	int location = -1;
+	explicit AgentPathEntry(int loc = -1) { location = loc; }
+};
 
-//enum heuristics_type { NONE, CG, DG, WDG, STRATEGY_COUNT };
+typedef vector<AgentPathEntry> AgentPath;
 
 typedef tuple<int, int, int, int, bool> Constraint;
 typedef tuple<int, int, int, int, int> Conflict;

@@ -167,6 +167,8 @@ Solution Planner::solve(std::string& additional_info)
         {
             if (curr_best->num_agent_reached < H->num_agent_reached)
                 curr_best = H;
+            if (curr_best->num_agent_reached == H->num_agent_reached && curr_best->depth < H->depth)
+                curr_best = H;
         }
 
         // check goal condition -- reach goal once
@@ -197,6 +199,10 @@ Solution Planner::solve(std::string& additional_info)
         if (!res) 
         {
             continue;
+        }
+        else
+        {
+            cout<<"get new config succeed"<<endl;
         }
 
 
@@ -384,7 +390,8 @@ bool Planner::get_new_config(HNode* H, LNode* L)
         auto a = A[k];
         if (a->v_next == nullptr && !funcPIBT(a))
         {
-          return false;  // planning failure
+            //cout<<"failure "<<a->id<<endl;
+            return false;  // planning failure
         }
     }
 
@@ -426,6 +433,7 @@ bool Planner::funcPIBT(LACAMAgent* ai)
     {
       std::reverse(C_next[i].begin(), C_next[i].begin() + K + 1);
     }
+    //cout<<"operations "<<K<<endl;
       
     // main operation
     for (auto k = 0; k < K + 1; ++k) 

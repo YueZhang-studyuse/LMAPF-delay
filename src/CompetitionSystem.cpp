@@ -4,6 +4,7 @@
 #include "nlohmann/json.hpp"
 #include <functional>
 #include <Logger.h>
+#include <DelaySimulation.h>
 
 using json = nlohmann::ordered_json;
 
@@ -37,8 +38,38 @@ list<Task> BaseSystem::move(vector<Action>& actions)
         delay[i] = simulation_delay[i][current_time];
     }
 
-    //curr_states = model->result_states(curr_states, actions);
-    curr_states = model->result_states_with_delays(curr_states, actions,delay);
+    vector<AgentPath> agents(curr_states.size());
+    for (int i = 0; i < curr_states.size(); i++)
+    {
+        agents[i].resize(2); //current implement for commit window = 1
+        agents[i][0].location = curr_states[i].location;
+    }
+
+    curr_states = model->result_states(curr_states, actions);
+    
+    for (int i = 0; i < curr_states.size(); i++)
+    {
+        //agents[i].resize(2); //current implement for commit window = 1
+        agents[i][1].location = curr_states[i].location;
+    }
+    //curr_states = model->result_states_with_delays(curr_states, actions,delay);
+    SimulateMCP postmcp(map.map.size(),1);
+    {
+        vector<AgentPath*> temp;
+        temp.resize(agents.size());
+        for (int a = 0; a < agents.size(); a++)
+        {
+            temp[a] = &(agents[a]);
+        }
+        postmcp.build(temp);
+        postmcp.simulate(temp,delay);
+    }
+    postmcp.clear();
+
+    for (int i = 0; i < agents.size();i++)
+    {
+        curr_states[i].location = agents[i][1].location;
+    }
 
     // agents do not move
     for (int k = 0; k < num_of_agents; k++)
@@ -89,100 +120,6 @@ void BaseSystem::plan_wrapper()
     planner->plan(plan_time_limit, actions);
 
     //return actions;
-}
-
-
-//vector<Action> BaseSystem::plan()
-// {
-//     using namespace std::placeholders;
-//     if (started && future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-//     {
-//         std::cout << started << "     " << (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) << std::endl;
-//         if(logger)
-//         {
-//             logger->log_info("planner cannot run because the previous run is still running", timestep);
-//         }
-
-//         //auto waitlimit = plan_time_limit+0.1;
-
-//         if (future.wait_for(std::chrono::seconds(plan_time_limit)) == std::future_status::ready) //allow some minor timeout
-//         {
-//             task_td.join();
-//             started = false;
-//             return future.get();
-//         }
-//         logger->log_info("planner timeout", timestep);
-//         return {};
-//     }
-
-//     std::packaged_task<std::vector<Action>()> task(std::bind(&BaseSystem::plan_wrapper, this));
-//     future = task.get_future();
-//     if (task_td.joinable())
-//     {
-//         task_td.join();
-//     }
-//     task_td = std::thread(std::move(task));
-//     started = true;
-//     if (future.wait_for(std::chrono::seconds(plan_time_limit)) == std::future_status::ready)
-//     {
-//         task_td.join();
-//         started = false;
-//         return future.get();
-//     }
-//     logger->log_info("planner timeout", timestep);
-//     return {};
-// }
-
-//vector<Action> BaseSystem::plan()
-bool BaseSystem::plan()
-{
-    using namespace std::placeholders;
-    // if (started && future.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
-    if (started)
-    {
-        //std::cout << started << "     " << (future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) << std::endl;
-        if(logger)
-        {
-            logger->log_info("planner cannot run because the previous run is still running", timestep);
-        }
-
-        //auto waitlimit = plan_time_limit+0.1;
-
-        if (future.wait_for(std::chrono::seconds(plan_time_limit)) == std::future_status::ready) //allow some minor timeout
-        //if (future.wait_for(std::chrono::milliseconds(plan_time_limit*1000)) == std::future_status::ready) //allow some minor timeout
-        {
-            task_td.join();
-            started = false;
-            //return future.get();
-            return true;
-        }
-        logger->log_info("planner timeout", timestep);
-        //return {};
-        return false;
-    }
-
-    // if (!started)
-    //     planner->loadPaths(); //we assume time on loading path is free for analysis
-
-    std::packaged_task<void()> task(std::bind(&BaseSystem::plan_wrapper, this));
-    future = task.get_future();
-    if (task_td.joinable())
-    {
-        task_td.join();
-    }
-    task_td = std::thread(std::move(task));
-    started = true;
-    if (future.wait_for(std::chrono::milliseconds(plan_time_limit*1000 + 200)) == std::future_status::ready) //we allow some minor timeouts
-    //if (future.wait_for(std::chrono::seconds(plan_time_limit + 1)) == std::future_status::ready)
-    {
-        task_td.join();
-        started = false;
-        //return future.get();
-        return true;
-    }
-    logger->log_info("planner timeout", timestep);
-    //return {};
-    return false;
 }
 
 
@@ -248,20 +185,10 @@ void BaseSystem::simulate(int simulation_time)
         
         planner->loadPaths(); //we assume time on loading path is free for analysis
 
-        // if (!started)
-        //     planner->loadPaths(); //we assume time on loading path is free for analysis
-
         auto start = std::chrono::steady_clock::now();
-
-        //bool finished = plan();
         planner->plan(plan_time_limit, actions);
 
         auto end = std::chrono::steady_clock::now();
-
-        // if (!finished)
-        //     actions = {};
-        // else
-            //planner->plan_commit(actions);
 
         timestep += 1;
         for (int a = 0; a < num_of_agents; a++)
@@ -353,50 +280,6 @@ void BaseSystem::initialize()
     {
         solution_costs[a] = 0;
     }
-}
-
-void BaseSystem::savePaths(const string &fileName, int option) const
-{
-    std::ofstream output;
-    output.open(fileName, std::ios::out);
-    for (int i = 0; i < num_of_agents; i++)
-    {
-        output << "Agent " << i << ": ";
-        if (option == 0)
-        {
-            bool first = true;
-            for (const auto t : actual_movements[i])
-            {
-                if (!first)
-                {
-                    output << ",";
-                }
-                else
-                {
-                    first = false;
-                }
-                output << t;
-            }
-        }
-        else if (option == 1)
-        {
-            bool first = true;
-            for (const auto t : planner_movements[i])
-            {
-                if (!first)
-                {
-                    output << ",";
-                } 
-                else 
-                {
-                    first = false;
-                }
-                output << t;
-            }
-        }
-        output << endl;
-    }
-    output.close();
 }
 
 

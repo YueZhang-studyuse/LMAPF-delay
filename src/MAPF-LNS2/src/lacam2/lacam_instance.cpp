@@ -20,21 +20,21 @@ LACAMInstance::LACAMInstance(SharedEnvironment* env)
   :G(env->map,env->rows,env->cols),starts(Config()), goals(Config()),N(env->num_of_agents)
 {
   //curr states is the start location
-  //cout<<"start"<<endl;
+  cout<<"start"<<endl;
   for (int i = 0; i < env->curr_states.size(); i++)
   {
     starts.push_back(G.U[env->curr_states[i].location]);
-    //cout<<env->curr_states[i].location<<" ";
+    cout<<env->curr_states[i].location<<" ";
   }
-  //cout<<endl;
+  cout<<endl;
 
-  //cout<<"goal"<<endl;
+  cout<<"goal"<<endl;
   for (int i = 0; i < env->goal_locations.size(); i++)
   {
     goals.push_back(G.U[env->goal_locations[i].front().first]);
-    //cout<<env->goal_locations[i].front().first<<" ";
+    cout<<env->goal_locations[i].front().first<<" ";
   }
-  //cout<<endl;
+  cout<<endl;
 }
 
 // for load instance

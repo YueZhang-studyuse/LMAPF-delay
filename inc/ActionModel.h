@@ -99,7 +99,7 @@ public:
     };
 
     vector<State> result_states_with_delays(const vector<State>& prev, const vector<Action> & action, const vector<bool> & delays);
-    void mcp_simulate(int agent, const vector<State>& prev, vector<State>& next, vector<list<int>> & orderes, unordered_map<int,bool> & simulated_agents,const vector<bool> & delays);
+    bool mcp_simulate(int agent, const vector<State>& prev, vector<State>& next, vector<list<int>> & orderes, unordered_map<int,bool> & simulated_agents,const vector<bool> & delays);
 
 
 protected:
