@@ -1,9 +1,0 @@
-{
-    "mapFile": "maps/random-32-32-20.map",
-    "agentFile": "agents/agent-300_scen-1.agents",
-    "teamSize": 300,
-    "taskFile": "tasks/agent-300_scen-1.tasks",
-    "numTasksReveal": 1,
-    "taskAssignmentStrategy": "roundrobin",
-    "delayFile":"delay/random-delay-0.2-1.txt"
-}
