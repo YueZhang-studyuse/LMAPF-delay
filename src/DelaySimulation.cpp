@@ -23,7 +23,7 @@ void SimulateMCP::simulate(vector<AgentPath*>& paths, const vector<bool> & delay
     cout<<"Start "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
 
     for (int t = 0; !unfinished_agents.empty(); t++) {
-        // cout<<"Similate t = "<<t<<endl;
+        //cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
 
@@ -32,9 +32,9 @@ void SimulateMCP::simulate(vector<AgentPath*>& paths, const vector<bool> & delay
             int i = *p;
             moveAgent(path_copy, paths, p, t, delays);
         }
-        // cout<<endl;
+        //cout<<endl;
 
-        // // cout<<"unfinished: "<< unfinished_agents.size() <<endl;
+        //cout<<"unfinished: "<< unfinished_agents.size() <<endl;
 
         // if (t > window_size) // no need to check if all agents stops in window, as collision not allowed.
         //     continue;
@@ -73,7 +73,7 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
 
     int i = *p;
 
-    // cout <<"work on agent "<<i<<endl;
+    //cout <<"work on agent "<<i<<endl;
     if (paths_copy[i].size() == t + 2)  // we have already made the movement decision for the agent
     {
         ++p;
@@ -83,7 +83,7 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
     assert(copy_agent_time[i] <= (int) no_wait_time[i].size());
     if (copy_agent_time[i] == (int) no_wait_time[i].size()) // the agent has reached the last location on its path
     {
-        // cout<<"Agent "<<i<<" reach last " <<endl;
+        //cout<<"Agent "<<i<<" reach last " <<endl;
         int loc = paths[i]->back().location;
         if (paths_copy[i][t].location == loc)// the agent has reached its goal location
         {
@@ -98,9 +98,9 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
             copy_mcp[loc].front().erase(i);
             if (copy_mcp[loc].front().empty())
                 copy_mcp[loc].pop_front();
-            // cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
+            //cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
             p = unfinished_agents.erase(p);
-            // cout <<"["<< i <<",g],";
+            //cout <<"["<< i <<",g],";
             return true;
         }
         else 
@@ -110,10 +110,11 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
     }
 
     //check delay here
-    if (copy_agent_time[i]  > 0 && delay[i]) //getting delaied at timestep 1 (current implementation for window = 1 only)
+    if (t == 1 && delay[i]) //getting delaied at timestep 1 (current implementation for window = 1 only)
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
+        //cout<<"delaied"<<endl;
         return false;
     }
 
@@ -149,14 +150,16 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
         
         copy_agent_time[i]++;
         ++p;
-        // cout <<"["<< i <<",m],";
+        //cout <<"["<< i <<",m],";
         return true;
     }
 
 
     assert(copy_mcp[loc].size() > 1);
 
-    if (copy_mcp[previous].begin()->count(i) > 0 &&  std::next(copy_mcp[loc].begin())->count(i) > 0){// the second agent is i
+    if (copy_mcp[previous].begin()->count(i) > 0 &&  std::next(copy_mcp[loc].begin())->count(i) > 0)
+    {
+        // the second agent is i
         if (t <= window_size 
             && (*std::next(copy_mcp[loc].begin())).size() > 1){
             paths_copy[i].push_back(paths_copy[i].back()); // stay still
@@ -184,7 +187,8 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
             bool succ = false;
             if ( 
             paths_copy[first_agent].size() == t + 1 &&  // we have not made the movement decision for the first agent
-            paths_copy[first_agent][t].location == loc )  // the fist agent is already at loc
+            paths_copy[first_agent][t].location == loc &&
+            (t != 1 || !delay[first_agent]))  // the fist agent is already at loc
             {
                 auto p2 = std::find(unfinished_agents.begin(), unfinished_agents.end(), first_agent);
                 assert(p2 != unfinished_agents.end());

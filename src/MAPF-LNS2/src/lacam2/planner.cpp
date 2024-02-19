@@ -200,10 +200,10 @@ Solution Planner::solve(std::string& additional_info)
         {
             continue;
         }
-        else
-        {
-            cout<<"get new config succeed"<<endl;
-        }
+        // else
+        // {
+        //     cout<<"get new config succeed"<<endl;
+        // }
 
 
         vector<bool> reached;
