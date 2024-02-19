@@ -6,9 +6,10 @@ def generate_delay(p):
     number_agents = 5000
     simulation_time = 1000
     #p = 0.2
-    file_name = 'lifelong_benchmark/delay/'+'delay-'+str(p)+'-1.txt'
+    file_name = 'lifelong_benchmark/delay2/'+'delay2-'+str(p)+'-1.txt'
 
     delay = []
+    cnt_delay = 0
 
     for i in range(0,number_agents):
         agent_delay = []
@@ -17,15 +18,15 @@ def generate_delay(p):
             if dp > p:
                 agent_delay.append(str(0))
             else:
-                agent_delay+=[str(1)]*(random.randint(1,5))
+                agent_delay.append(str(1))
         delay.append(agent_delay)
+        cnt_delay+= agent_delay.count('1')
 
     with open(file_name,'w') as f:
-        f.write(str(number_agents) + '\n')
+        f.write(str(number_agents)+ ','+ str(cnt_delay) + '\n')
         for a in delay:
             #print(a)
-            print(len(a[0:1000]))
-            f.write(','.join(a[0:1000]) + '\n')
+            f.write(','.join(a) + '\n')
         f.close()
 
 
@@ -43,20 +44,20 @@ for agent in agent_group:
             'taskFile':'tasks/agent-'+str(agent)+'_scen-1.tasks',
             'numTasksReveal':1,
             'taskAssignmentStrategy':'roundrobin',
-            "delayFile":"../delay/delay-0.01-1.txt"}
-    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.01-1.json','w') as f:
+            "delayFile":"../delay/delay2-0.01-1.txt"}
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay2-0.01-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.02-1.txt"
-    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.02-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.02-1.txt"
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay2-0.02-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.03-1.txt"
-    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.03-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.03-1.txt"
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay2-0.03-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.04-1.txt"
-    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.04-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.04-1.txt"
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay2-0.04-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.05-1.txt"
-    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.05-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.05-1.txt"
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay2-0.05-1.json','w') as f:
         json.dump(temp,f,indent=2)
 
 agent_group = [200,400,600,800,1000]
@@ -67,18 +68,18 @@ for agent in agent_group:
             'taskFile':'tasks/agent-'+str(agent)+'_scen-1.tasks',
             'numTasksReveal':1,
             'taskAssignmentStrategy':'roundrobin',
-            "delayFile":"../delay/delay-0.01-1.txt"}
-    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay-0.01-1.json','w') as f:
+            "delayFile":"../delay/delay2-0.01-1.txt"}
+    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay2-0.01-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.02-1.txt"
-    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay-0.02-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.02-1.txt"
+    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay2-0.02-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.03-1.txt"
-    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay-0.03-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.03-1.txt"
+    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay2-0.03-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.04-1.txt"
-    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay-0.04-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.04-1.txt"
+    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay2-0.04-1.json','w') as f:
         json.dump(temp,f,indent=2)
-    temp["delayFile"] = "../delay/delay-0.05-1.txt"
-    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay-0.05-1.json','w') as f:
+    temp["delayFile"] = "../delay/delay2-0.05-1.txt"
+    with open('lifelong_benchmark/warehouse-s/agent-'+str(agent)+'_scen-delay2-0.05-1.json','w') as f:
         json.dump(temp,f,indent=2)
