@@ -21,5 +21,7 @@ public:
     int curr_timestep = 0;
     vector<State> curr_states;
 
+    vector<AgentPath> planned_paths;
+
     SharedEnvironment(){}
 };

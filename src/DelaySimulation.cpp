@@ -92,12 +92,12 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
         {
             assert(copy_mcp[loc].front().count(i)>0);
 
-            // if (t <= window_size)
-            // {
-            //     paths_copy[i].push_back(paths_copy[i].back());
-            //     ++p;
-            //     return false;
-            // }
+            if (t <= window_size)
+            {
+                paths_copy[i].push_back(paths_copy[i].back());
+                ++p;
+                return false;
+            }
             copy_mcp[loc].front().erase(i);
             if (copy_mcp[loc].front().empty())
                 copy_mcp[loc].pop_front();
@@ -121,11 +121,67 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
         return false;
     }
 
-
     // check mcp to determine whether the agent should move or wait
     int loc = paths[i]->at(no_wait_time[i][copy_agent_time[i]]).location;
     int previous = paths[i]->at(no_wait_time[i][copy_agent_time[i] - 1]).location;
     assert(!copy_mcp[loc].empty());
+
+    // if t is in the window, 
+    if (t <= window_size){
+        // cout<<"check if collision at "<< t <<" for "<< i <<endl;
+        // cout<<"time "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
+
+
+        if (previous == loc && 
+        copy_mcp[loc].begin()->count(i) &&
+        std::next(copy_mcp[loc].begin()) != copy_mcp[loc].end() &&
+        std::next(copy_mcp[loc].begin())->size() > 1){
+            paths_copy[i].push_back(paths_copy[i].back());
+            ++p;
+            // cout <<"["<< i <<",wv(a)],";
+            // cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
+            return false;
+        }
+        //and next location record more than one agent in top of mcp (vertex conflict may occur), then wait
+        else if (copy_mcp[loc].front().size() > 1){
+            paths_copy[i].push_back(paths_copy[i].back());
+            ++p;
+            // cout <<"["<< i <<",wv],";
+            // cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
+            return false;
+        }
+        //if edge conflict may occur, then wait
+        else if (
+            //if the second agent of next loc include i
+            previous != loc &&
+            (std::next(copy_mcp[previous].begin()) != copy_mcp[previous].end()) &&
+            (std::next(copy_mcp[loc].begin())!= copy_mcp[loc].end() )&&
+            ((*std::next(copy_mcp[loc].begin())).count(i) > 0)
+        ){
+            //check if the first agents a of next loc is at loc, and want to move to previous loc (the second agents of previous include a)
+            for (auto a : copy_mcp[loc].front()){
+                // cout << "check edge conflict for "<< a << endl;
+
+                if (copy_agent_time[a] == (int) no_wait_time[a].size()){
+                    //the agent in the front stays at the goal in the window, has no place to go, waiting to avoid target conflict in the original path.
+                    paths_copy[i].push_back(paths_copy[i].back());
+                    ++p;
+                    return false;
+                }
+
+                int target = paths[a]->at(no_wait_time[a][copy_agent_time[a]]).location;
+                if ( (target== previous) && (paths_copy[a][t].location == loc) && (*std::next(copy_mcp[previous].begin())).count(a) > 0){
+                    paths_copy[i].push_back(paths_copy[i].back());
+                    ++p;
+                    // cout <<"["<< i <<",we],";
+
+                    // cout<< i <<" stop at" << t << "to avoid edge conflict on "<< previous << " - "<< loc <<endl; 
+                    return false;
+                }
+
+            }
+        }
+    }
 
 
     if (copy_mcp[previous].begin()->count(i) > 0 && copy_mcp[loc].front().count(i)>0)

@@ -38,6 +38,16 @@ void MAPFPlanner::loadPaths()
     if (initial_success && !initial_run && commited_paths[0].empty())
     {
         lns->clearAll("Adaptive");
+        //change future_paths to the mcped version
+        future_paths.clear();
+        future_paths.resize(env->num_of_agents);
+        for (int agent = 0; agent < env->num_of_agents; agent++)
+        {
+            for (int t = 1; t < env->planned_paths[agent].size();t++)
+            {
+                future_paths[agent].push_back(env->planned_paths[agent][t].location);
+            }
+        }
         lns->loadPaths(future_paths);
         lns->checkReplan();
     }
@@ -253,6 +263,25 @@ void MAPFPlanner::plan(int time_limit,vector<Action> & actions)
         {
             cerr<<"errors"<<endl;
             exit(-1);
+        }
+        //put all current paths to shared env
+        env->planned_paths.clear();
+        env->planned_paths.resize(env->num_of_agents);
+        for (int i = 0; i < env->num_of_agents; i++)
+        {
+            env->planned_paths[i].resize(commited_paths[i].size()+future_paths[i].size()+1); //current implement for commit window = 1
+            env->planned_paths[i][0].location = env->curr_states[i].location;
+            int cnt = 1;
+            for (auto loc: commited_paths[i])
+            {
+                env->planned_paths[i][cnt].location = loc;
+                cnt++;
+            }
+            for (auto loc: future_paths[i])
+            {
+                env->planned_paths[i][cnt].location = loc;
+                cnt++;
+            }
         }
     }
 

@@ -28,48 +28,37 @@ list<Task> BaseSystem::move(vector<Action>& actions)
     {
         fast_mover_feasible = false;
         actions = std::vector<Action>(num_of_agents, Action::WA);
+        curr_states = model->result_states(curr_states, actions);
     }
-
-    vector<bool> delay;
-    delay.resize(num_of_agents);
-    int current_time = curr_states[0].timestep;
-    for (int i = 0; i < num_of_agents; i++)
+    else //we simulate delays
     {
-        delay[i] = simulation_delay[i][current_time];
-    }
-
-    vector<AgentPath> agents(curr_states.size());
-    for (int i = 0; i < curr_states.size(); i++)
-    {
-        agents[i].resize(2); //current implement for commit window = 1
-        agents[i][0].location = curr_states[i].location;
-    }
-
-    curr_states = model->result_states(curr_states, actions);
-    
-    for (int i = 0; i < curr_states.size(); i++)
-    {
-        //agents[i].resize(2); //current implement for commit window = 1
-        agents[i][1].location = curr_states[i].location;
-        //cout<<agents[i][0].location<<"->"<<agents[i][1].location<<endl;
-    }
-    //curr_states = model->result_states_with_delays(curr_states, actions,delay);
-    SimulateMCP postmcp(map.map.size(),1);
-    {
-        vector<AgentPath*> temp;
-        temp.resize(agents.size());
-        for (int a = 0; a < agents.size(); a++)
+        vector<bool> delay;
+        delay.resize(num_of_agents);
+        int current_time = curr_states[0].timestep;
+        for (int i = 0; i < num_of_agents; i++)
         {
-            temp[a] = &(agents[a]);
+            delay[i] = simulation_delay[i][current_time];
         }
-        postmcp.build(temp);
-        postmcp.simulate(temp,delay);
-    }
-    postmcp.clear();
 
-    for (int i = 0; i < agents.size();i++)
-    {
-        curr_states[i].location = agents[i][1].location;
+        curr_states = model->result_states(curr_states, actions);
+        
+        SimulateMCP postmcp(map.map.size(),1);
+        {
+            vector<AgentPath*> temp;
+            temp.resize(env->num_of_agents);
+            for (int a = 0; a < env->planned_paths.size(); a++)
+            {
+                temp[a] = &(env->planned_paths[a]);
+            }
+            postmcp.build(temp);
+            postmcp.simulate(temp,delay);
+        }
+        postmcp.clear();
+
+        for (int i = 0; i < env->planned_paths.size();i++)
+        {
+            curr_states[i].location = env->planned_paths[i][1].location;
+        }
     }
 
     // agents do not move
