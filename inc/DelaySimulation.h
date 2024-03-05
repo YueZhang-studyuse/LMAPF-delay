@@ -10,7 +10,7 @@ public:
 
     SimulateMCP(int map_size, int window_size):map_size(map_size),window_size(window_size){};
 
-    void build(vector<AgentPath*>& paths);
+    void build(vector<Path*>& paths);
     void clear(void)
     {
         mcp.clear();
@@ -22,10 +22,10 @@ public:
     void print(int loc);
     void printAgentTime(int num_agents);
     void printAgentNoWaitTime(int num_agents);
-    void simulate(vector<AgentPath*>& paths, const vector<bool> & delays);
+    void simulate(vector<Path*>& paths, const vector<bool> & delays);
 
     std::set<int> delayed_agents;
-    int count_pairs(vector<AgentPath>& paths){
+    int count_pairs(vector<Path>& paths){
         std::set<std::set<int>> colliding_pairs; 
         int count = 0;
         for (int i = 0; i < paths.size(); i++)
@@ -46,7 +46,7 @@ public:
         return colliding_pairs.size();
     };
 
-    void print_mcp_detail(vector<AgentPath*>& paths){
+    void print_mcp_detail(vector<Path*>& paths){
             for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();p++) {
                 int i = *p;
 
@@ -91,5 +91,5 @@ private:
     vector<int> delay_for;
     int window_size;
 
-    bool moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& paths, list<int>::iterator& p, int t, const vector<bool> & delay);
+    bool moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::iterator& p, int t, const vector<bool> & delay);
 };

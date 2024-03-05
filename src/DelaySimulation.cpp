@@ -1,9 +1,9 @@
 #include "DelaySimulation.h"
 
 
-void SimulateMCP::simulate(vector<AgentPath*>& paths, const vector<bool> & delays)
+void SimulateMCP::simulate(vector<Path*>& paths, const vector<bool> & delays)
 {
-    vector<AgentPath> path_copy; 
+    vector<Path> path_copy; 
     path_copy.resize(paths.size());
     copy_agent_time = agent_time;
     copy_mcp = mcp;
@@ -68,7 +68,7 @@ void SimulateMCP::simulate(vector<AgentPath*>& paths, const vector<bool> & delay
     return;
 }
 
-bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& paths, list<int>::iterator& p, int t, const vector<bool> & delay)
+bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::iterator& p, int t, const vector<bool> & delay)
 {
 
     int i = *p;
@@ -289,7 +289,7 @@ bool SimulateMCP::moveAgent(vector<AgentPath>& paths_copy, vector<AgentPath*>& p
 }
 
 
-void SimulateMCP::build(vector<AgentPath*>& paths)  
+void SimulateMCP::build(vector<Path*>& paths)  
 {
     cout<<"SimulateMCP window size:"<< window_size <<endl;
     //if (options1.debug)

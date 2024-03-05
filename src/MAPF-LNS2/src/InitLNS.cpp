@@ -822,7 +822,7 @@ unordered_map<int, set<int>>& InitLNS::findConnectedComponent(const vector<set<i
 void InitLNS::printPath() const
 {
     for (const auto& agent : agents)
-        cout << "Agent " << agent.id << ": " << agent.path << endl;
+        cout << "Agent " << agent.id<<endl; //<< ": " << agent.path << endl;
 }
 
 void InitLNS::printResult()

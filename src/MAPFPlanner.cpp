@@ -5,9 +5,9 @@
 
 void MAPFPlanner::initialize(int preprocess_time_limit)
 {
-    remain_commit = 0;
     instance.initMap(env);
-    instance.computeAllPair();
+    instance.computeAllPair(); //all pair heuristic 
+    
     lns = new LNS(instance, preprocess_time_limit,
                 "LACAM",
                 "PP",
@@ -18,7 +18,6 @@ void MAPFPlanner::initialize(int preprocess_time_limit)
                 "Adaptive",
                 true,
                 true,0);
-    //lns->setIterations(0);
 
     commited_paths.resize(env->num_of_agents);
     future_paths.resize(env->num_of_agents);
@@ -59,7 +58,7 @@ void MAPFPlanner::plan(int time_limit,vector<Action> & actions)
 
     if (!commited_paths[0].empty())
     {
-        // //trans to actions
+        //trans to actions
         for (int agent = 0; agent < env->num_of_agents; agent++)
         { 
             int next_loc = commited_paths[agent].front();

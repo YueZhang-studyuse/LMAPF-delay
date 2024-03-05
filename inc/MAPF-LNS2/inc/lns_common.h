@@ -14,6 +14,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <map>
+#include "common.h"
 
 using boost::heap::pairing_heap;
 using boost::heap::compare;
@@ -47,14 +48,14 @@ typedef std::chrono::duration<float> fsec;
 #define MAX_COST INT_MAX / 2
 #define MAX_NODES INT_MAX / 2
 
-struct PathEntry
-{
-	int location = -1;
-	explicit PathEntry(int loc = -1) { location = loc; }
-};
+// struct PathEntry
+// {
+// 	int location = -1;
+// 	explicit PathEntry(int loc = -1) { location = loc; }
+// };
 
-typedef vector<PathEntry> Path;
-std::ostream& operator<<(std::ostream& os, const Path& path);
+// typedef vector<PathEntry> Path;
+// std::ostream& operator<<(std::ostream& os, const Path& path);
 bool isSamePath(const Path& p1, const Path& p2);
 
 struct IterationStats

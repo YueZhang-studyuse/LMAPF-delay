@@ -38,13 +38,13 @@ using std::min;
 using std::priority_queue;
 using std::shared_ptr;
 
-struct AgentPathEntry
+struct PathEntry
 {
 	int location = -1;
-	explicit AgentPathEntry(int loc = -1) { location = loc; }
+	explicit PathEntry(int loc = -1) { location = loc; }
 };
 
-typedef vector<AgentPathEntry> AgentPath;
+typedef vector<PathEntry> Path;
 
 typedef tuple<int, int, int, int, bool> Constraint;
 typedef tuple<int, int, int, int, int> Conflict;

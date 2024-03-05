@@ -37,3 +37,12 @@ ostream& operator<<(ostream& os, const Interval& interval)
        std::get<2>(interval) << ")";
     return os;
 }
+
+ostream& operator<<(std::ostream& os, const Path& path)
+{
+	for (const auto& state : path)
+	{
+		os << state.location << "\t"; // << "(" << state.is_single() << "),";
+	}
+	return os;
+}

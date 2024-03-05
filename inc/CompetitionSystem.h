@@ -14,6 +14,7 @@ class BaseSystem
 {
 public:
     int num_tasks_reveal = 1;
+    int commit_window = 1;
     Logger* logger = nullptr;
 
     vector<vector<bool>> simulation_delay;
@@ -73,11 +74,14 @@ protected:
     //store the commit waitted to execute
     //vector<vector<Action>> last_commit; //the lastest committed actions
     //vector<int> pre_con_last_commit; //the pre conditions (starting locations) of the last commit
-    vector<Action> actions;
+    //vector<Action> actions;
+    //a vector to store current commit
+    vector<Path> curr_commits;
 
     int preprocess_time_limit=10;
 
-    int plan_time_limit = 3;
+    int plan_time_limit;
+    int init_time_limit;
 
     std::vector<SimulatePath> paths;
     std::vector<std::list<Task > > finished_tasks; // location + finish time
@@ -97,7 +101,6 @@ protected:
     list<Task> all_tasks;
 
     //for evaluation
-    vector<int> solution_costs;
     int num_of_task_finish = 0;
     list<double> planner_times; 
     bool fast_mover_feasible = true;

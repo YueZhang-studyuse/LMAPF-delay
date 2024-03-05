@@ -44,7 +44,7 @@ list<Task> BaseSystem::move(vector<Action>& actions)
         
         SimulateMCP postmcp(map.map.size(),1);
         {
-            vector<AgentPath*> temp;
+            vector<Path*> temp;
             temp.resize(env->num_of_agents);
             for (int a = 0; a < env->planned_paths.size(); a++)
             {
@@ -157,80 +157,106 @@ void BaseSystem::log_event_finished(int agent_id, int task_id, int timestep)
     logger->log_info("Agent " + std::to_string(agent_id) + " finishes task " + std::to_string(task_id), timestep);
 }
 
+void BaseSystem::execution_with_delay(vector<Path> curr_commits)
+{
+        vector<vector<bool>> delay; // delay within window
+        delay.resize(num_of_agents);
+        int current_time = curr_states[0].timestep;
+        for (int i = 0; i < num_of_agents; i++)
+        {
+            delay[i].resize(commit_window);
+            for (int t = 0; t < commit_window; t++)
+            {
+                delay[i][t] = simulation_delay[i][current_time+t];
+            }
+        }
+
+        //curr_states = model->result_states(curr_states, actions);
+        
+        SimulateMCP postmcp(map.map.size(),1);
+        {
+            vector<Path*> temp;
+            temp.resize(env->num_of_agents);
+            for (int a = 0; a < env->planned_paths.size(); a++)
+            {
+                temp[a] = &(curr_commits[a]);
+            }
+            postmcp.build(temp);
+            postmcp.simulate(temp,delay);
+        }
+        postmcp.clear();
+}
 
 void BaseSystem::simulate(int simulation_time)
 {
     //init logger
-    initialize();
+    initialize(); //funciontal initiliazing (maps, pre-process, etc.)
     int num_of_tasks = 0;
 
-    for (; timestep < simulation_time; )
+    cout << "----------------------------" << std::endl;
+    cout << "Timestep " << timestep << std::endl;
+    //add an initial planning here
+    //plan
+    auto start = std::chrono::steady_clock::now();
+    planner->plan(init_time_limit);
+    auto end = std::chrono::steady_clock::now();
+    auto diff = end-start; //actual planning time
+    planner_times.push_back(std::chrono::duration<double>(diff).count());
+    //commit k
+    curr_commits.clear();
+    planner->commit(curr_commits);
+    timestep++;
+
+
+    for (; timestep < simulation_time; ) //start execution
     {
         cout << "----------------------------" << std::endl;
         cout << "Timestep " << timestep << std::endl;
 
-        // find a plan
-        sync_shared_env();
+        //*** execution component ***
+        // execute for window (i-1)
 
-        
+        // execution with delay polocy and get the actual moves
+        execution_with_delay();
+
+        // dummy simulate for window (i) use the same policy
+
+        // // move drives
+        // list<Task> new_finished_tasks = move(actions);
+        // if (!planner_movements[0].empty() && planner_movements[0].back() == Action::NA)
+        // {
+        //     planner_times.back()+=plan_time_limit;  //add planning time to last record
+        // }
+        // else
+        // {
+        //     auto diff = end-start;
+        //     planner_times.push_back(std::chrono::duration<double>(diff).count());
+        // }
+        // cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;
+
+        // // update tasks
+        // for (auto task : new_finished_tasks)
+        // {
+        //     // int id, loc, t;
+        //     // std::tie(id, loc, t) = task;
+        //     finished_tasks[task.agent_assigned].emplace_back(task);
+        //     num_of_tasks++;
+        //     num_of_task_finish++;
+        // }
+        // cout << num_of_tasks << " tasks has been finished by far in total" << std::endl;
+
+        // update_tasks();
+
+        //*** dummy sync component ***
+        // simulate plans send to executor/ start and goal positions to planner for window (i)
+        sync_shared_env(); // need to extend to a dummy simulater
+
+        //*** plan component ***  
+        // plan for window (i)     
         planner->loadPaths(); //we assume time on loading path is free for analysis
-
         auto start = std::chrono::steady_clock::now();
         planner->plan(plan_time_limit, actions);
-
         auto end = std::chrono::steady_clock::now();
-
-        timestep += 1;
-        for (int a = 0; a < num_of_agents; a++)
-        {
-            if (!env->goal_locations[a].empty())
-                solution_costs[a]++;
-        }
-
-        // move drives
-        list<Task> new_finished_tasks = move(actions);
-        if (!planner_movements[0].empty() && planner_movements[0].back() == Action::NA)
-        {
-            planner_times.back()+=plan_time_limit;  //add planning time to last record
-        }
-        else
-        {
-            auto diff = end-start;
-            planner_times.push_back(std::chrono::duration<double>(diff).count());
-        }
-        cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;
-
-        // update tasks
-        for (auto task : new_finished_tasks)
-        {
-            // int id, loc, t;
-            // std::tie(id, loc, t) = task;
-            finished_tasks[task.agent_assigned].emplace_back(task);
-            num_of_tasks++;
-            num_of_task_finish++;
-        }
-        cout << num_of_tasks << " tasks has been finished by far in total" << std::endl;
-
-        update_tasks();
-
-        bool complete_all = false;
-        for (auto & t: assigned_tasks)
-        {
-            if(t.empty()) 
-            {
-                complete_all = true;
-            }
-            else
-            {
-                complete_all = false;
-                break;
-            }
-        }
-        if (complete_all)
-        {
-            cout << std::endl << "All task finished!" << std::endl;
-            break;
-        }
     }
 
     cout << std::endl << "Done!" << std::endl;
@@ -265,11 +291,6 @@ void BaseSystem::initialize()
 
     actual_movements.resize(num_of_agents);
     planner_movements.resize(num_of_agents);
-    solution_costs.resize(num_of_agents);
-    for (int a = 0; a < num_of_agents; a++)
-    {
-        solution_costs[a] = 0;
-    }
 }
 
 
@@ -314,23 +335,7 @@ void BaseSystem::saveResults(const string &fileName, const bool outputSimple) co
     }
 
     js["numTaskFinished"] = num_of_task_finish;
-    int sum_of_cost = 0;
-    int makespan = 0;
-    if (num_of_agents > 0)
-    {
-        sum_of_cost = solution_costs[0];
-        makespan = solution_costs[0];
-        for (int a = 1; a < num_of_agents; a++)
-        {
-            sum_of_cost += solution_costs[a];
-            if (solution_costs[a] > makespan)
-            {
-                makespan = solution_costs[a];
-            }
-        }
-    }
-    js["sumOfCost"] = sum_of_cost;
-    js["makespan"] = makespan;
+    js["makespan"] = actual_movements[0].size();
   
     if (!outputSimple)
     {
