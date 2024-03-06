@@ -21,7 +21,7 @@ public:
     int curr_timestep = 0;
     vector<State> curr_states;
 
-    vector<Path> planned_paths;
+    vector<Path> unexecuted_paths; // commit but simulate says will not be execute
 
     SharedEnvironment(){}
 };

@@ -170,8 +170,6 @@ void BaseSystem::execution_with_delay(vector<Path> curr_commits)
                 delay[i][t] = simulation_delay[i][current_time+t];
             }
         }
-
-        //curr_states = model->result_states(curr_states, actions);
         
         SimulateMCP postmcp(map.map.size(),1);
         {
@@ -198,14 +196,13 @@ void BaseSystem::simulate(int simulation_time)
     //add an initial planning here
     //plan
     auto start = std::chrono::steady_clock::now();
+    planner->loadPaths(); //we assume time on loading path is free for analysis
     planner->plan(init_time_limit);
     auto end = std::chrono::steady_clock::now();
     auto diff = end-start; //actual planning time
     planner_times.push_back(std::chrono::duration<double>(diff).count());
     //commit k
-    curr_commits.clear();
-    planner->commit(curr_commits);
-    timestep++;
+    planner->commit(curr_commits); //push back the curr commits
 
 
     for (; timestep < simulation_time; ) //start execution
@@ -213,50 +210,49 @@ void BaseSystem::simulate(int simulation_time)
         cout << "----------------------------" << std::endl;
         cout << "Timestep " << timestep << std::endl;
 
+        //if simulation time is over, don't plan
+        if (timestep + commit_window < simulation_time)
+        {
+            //*** dummy sync component ***
+            // predict the moves, give new goals if will finsihed, return moves will not be executed to planner
+            sync_shared_env(); // need to extend to a dummy simulater
+
+            //*** plan component ***  
+            // plan for window (i)     
+            planner->loadPaths(); //we assume time on loading path is free for analysis
+            auto start = std::chrono::steady_clock::now();
+            planner->plan(plan_time_limit);
+            auto end = std::chrono::steady_clock::now();
+            auto diff = end-start; //actual planning time
+            planner_times.push_back(std::chrono::duration<double>(diff).count());
+            //commit k
+            planner->commit(curr_commits); //push back the curr commits
+        }
+
         //*** execution component ***
         // execute for window (i-1)
-
-        // execution with delay polocy and get the actual moves
-        execution_with_delay();
-
-        // dummy simulate for window (i) use the same policy
-
-        // // move drives
-        // list<Task> new_finished_tasks = move(actions);
-        // if (!planner_movements[0].empty() && planner_movements[0].back() == Action::NA)
-        // {
-        //     planner_times.back()+=plan_time_limit;  //add planning time to last record
-        // }
-        // else
-        // {
-        //     auto diff = end-start;
-        //     planner_times.push_back(std::chrono::duration<double>(diff).count());
-        // }
-        // cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;
-
-        // // update tasks
-        // for (auto task : new_finished_tasks)
-        // {
-        //     // int id, loc, t;
-        //     // std::tie(id, loc, t) = task;
-        //     finished_tasks[task.agent_assigned].emplace_back(task);
-        //     num_of_tasks++;
-        //     num_of_task_finish++;
-        // }
-        // cout << num_of_tasks << " tasks has been finished by far in total" << std::endl;
-
-        // update_tasks();
-
-        //*** dummy sync component ***
-        // simulate plans send to executor/ start and goal positions to planner for window (i)
-        sync_shared_env(); // need to extend to a dummy simulater
-
-        //*** plan component ***  
-        // plan for window (i)     
-        planner->loadPaths(); //we assume time on loading path is free for analysis
-        auto start = std::chrono::steady_clock::now();
-        planner->plan(plan_time_limit, actions);
-        auto end = std::chrono::steady_clock::now();
+        // todo: add a validation component (current it's fine because the solver always return conflict-free solution)
+        // execution with real delays w(i-1) and simulate future moves of w(i)
+        execution_sync(); 
+        for (int i = 1; i <= commit_window; i++)
+        {
+            list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
+            cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;
+            for (auto task : new_finished_tasks)
+            {
+                // int id, loc, t;
+                // std::tie(id, loc, t) = task;
+                finished_tasks[task.agent_assigned].emplace_back(task);
+                num_of_tasks++;
+                num_of_task_finish++;
+            }
+            cout << num_of_tasks << " tasks has been finished by far in total" << std::endl;
+            update_tasks();
+            if (timestep >= simulation_time)
+            {
+                break;
+            }
+        }
     }
 
     cout << std::endl << "Done!" << std::endl;
