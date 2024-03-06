@@ -88,28 +88,42 @@ bool BaseSystem::valid_moves(vector<State>& prev, vector<Action>& action)
 }
 
 
-void BaseSystem::sync_shared_env() {
+void BaseSystem::sync_shared_env() 
+{
     env->goal_locations.resize(num_of_agents);
     for (size_t i = 0; i < num_of_agents; i++)
     {
         env->goal_locations[i].clear();
-        for (auto& task: assigned_tasks[i])
+        //check if current assigned task will be finished or not
+        list<Task> copy_tasks;
+        for(auto& task: assigned_tasks[i])
+        {
+            copy_tasks.push_back({task.location, task.t_assigned });
+        }
+        //dummy simulation of task finishing with inf assign system
+        for (auto loc: curr_commits[i])
+        {
+            if (loc.location == copy_tasks.front().location)
+                copy_tasks.pop_front();
+            int counter = task_counter[k];
+            int id = 0;
+            while (copy_tasks.size() < num_tasks_reveal)
+            {
+                int c = counter * num_of_agents + i;
+                int loc = tasks[c%tasks_size];
+                Task task(task_id+id,loc,timestep,i);
+                copy_tasks.push_back(task);
+                id++;
+                counter++;
+            }
+        }
+        for(auto& task: copy_tasks[i])
         {
             env->goal_locations[i].push_back({task.location, task.t_assigned });
         }
     }
     env->curr_timestep = timestep;
     env->curr_states = curr_states;
-}
-
-
-//vector<Action> BaseSystem::plan_wrapper()
-void BaseSystem::plan_wrapper()
-{
-    //vector<Action> actions;
-    planner->plan(plan_time_limit, actions);
-
-    //return actions;
 }
 
 
@@ -195,6 +209,7 @@ void BaseSystem::simulate(int simulation_time)
     cout << "Timestep " << timestep << std::endl;
     //add an initial planning here
     //plan
+    sync_shared_env();
     auto start = std::chrono::steady_clock::now();
     planner->loadPaths(); //we assume time on loading path is free for analysis
     planner->plan(init_time_limit);
@@ -210,24 +225,24 @@ void BaseSystem::simulate(int simulation_time)
         cout << "----------------------------" << std::endl;
         cout << "Timestep " << timestep << std::endl;
 
-        //if simulation time is over, don't plan
-        if (timestep + commit_window < simulation_time)
-        {
-            //*** dummy sync component ***
-            // predict the moves, give new goals if will finsihed, return moves will not be executed to planner
-            sync_shared_env(); // need to extend to a dummy simulater
+        // //if simulation time is over, don't plan
+        // if (timestep + commit_window < simulation_time)
+        // {
+        //*** dummy sync component ***
+        // predict the moves, give new goals if will finsihed, return moves will not be executed to planner
+        sync_shared_env(); // need to extend to a dummy simulater
 
-            //*** plan component ***  
-            // plan for window (i)     
-            planner->loadPaths(); //we assume time on loading path is free for analysis
-            auto start = std::chrono::steady_clock::now();
-            planner->plan(plan_time_limit);
-            auto end = std::chrono::steady_clock::now();
-            auto diff = end-start; //actual planning time
-            planner_times.push_back(std::chrono::duration<double>(diff).count());
-            //commit k
-            planner->commit(curr_commits); //push back the curr commits
-        }
+        //*** plan component ***  
+        // plan for window (i)     
+        planner->loadPaths(); //we assume time on loading path is free for analysis
+        auto start = std::chrono::steady_clock::now();
+        planner->plan(plan_time_limit);
+        auto end = std::chrono::steady_clock::now();
+        auto diff = end-start; //actual planning time
+        planner_times.push_back(std::chrono::duration<double>(diff).count());
+        //commit k
+        planner->commit(curr_commits); //push back the curr commits
+        //}
 
         //*** execution component ***
         // execute for window (i-1)
@@ -268,10 +283,10 @@ void BaseSystem::initialize()
     env->cols = map.cols;
     env->map = map.map;
     finished_tasks.resize(num_of_agents);
-    // bool succ = load_records(); // continue simulating from the records
     timestep = 0;
     curr_states = starts;
     assigned_tasks.resize(num_of_agents);
+    curr_commits.resize(num_of_agents);
 
     //planner initilise before knowing the first goals
     auto planner_initialize_success= planner_initialize();
@@ -283,7 +298,7 @@ void BaseSystem::initialize()
     // initialize_goal_locations();
     update_tasks();
 
-    sync_shared_env();
+    //sync_shared_env();
 
     actual_movements.resize(num_of_agents);
     planner_movements.resize(num_of_agents);
