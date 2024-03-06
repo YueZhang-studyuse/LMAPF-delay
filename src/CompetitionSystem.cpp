@@ -122,8 +122,19 @@ void BaseSystem::sync_shared_env()
             env->goal_locations[i].push_back({task.location, task.t_assigned });
         }
     }
-    env->curr_timestep = timestep;
-    env->curr_states = curr_states;
+    env->curr_timestep = timestep+commit_window;
+    //env->curr_states = curr_states; //need to change current states
+    for (int i = 0; i < num_of_agents; i++)
+    {
+        if (env->unexecuted_paths[i].size() < commit_window)
+        {
+            env->curr_states[i].location = unexecuted_paths[i].back().location;
+        }
+        else
+        {
+            env->curr_states[i].location = unexecuted_paths[i][commit_window-1].location;
+        }
+    }
 }
 
 
@@ -207,15 +218,18 @@ void BaseSystem::simulate(int simulation_time)
 
     cout << "----------------------------" << std::endl;
     cout << "Timestep " << timestep << std::endl;
+
     //add an initial planning here
     //plan
     sync_shared_env();
-    auto start = std::chrono::steady_clock::now();
+
     planner->loadPaths(); //we assume time on loading path is free for analysis
+    auto start = std::chrono::steady_clock::now();
     planner->plan(init_time_limit);
     auto end = std::chrono::steady_clock::now();
     auto diff = end-start; //actual planning time
     planner_times.push_back(std::chrono::duration<double>(diff).count());
+
     //commit k
     planner->commit(curr_commits); //push back the curr commits
 

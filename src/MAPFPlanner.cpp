@@ -37,16 +37,17 @@ void MAPFPlanner::loadPaths()
     if (initial_success && !initial_run && commited_paths[0].empty())
     {
         lns->clearAll("Adaptive");
-        //change future_paths to the mcped version
-        future_paths.clear();
-        future_paths.resize(env->num_of_agents);
-        for (int agent = 0; agent < env->num_of_agents; agent++)
-        {
-            for (int t = 1; t < env->planned_paths[agent].size();t++)
-            {
-                future_paths[agent].push_back(env->planned_paths[agent][t].location);
-            }
-        }
+        // //change future_paths to the mcped version
+        // future_paths.clear();
+        // future_paths.resize(env->num_of_agents);
+        // for (int agent = 0; agent < env->num_of_agents; agent++)
+        // {
+        //     for (int t = 1; t < env->planned_paths[agent].size();t++)
+        //     {
+        //         future_paths[agent].push_back(env->planned_paths[agent][t].location);
+        //     }
+        // }
+        // add 
         lns->loadPaths(future_paths);
         lns->checkReplan();
     }
