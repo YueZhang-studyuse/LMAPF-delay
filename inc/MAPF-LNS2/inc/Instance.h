@@ -79,16 +79,6 @@ public:
 		return heuristic[loc1][loc2];
 	}
 
-	int getAllpairDistance(int agent, int timestep, int loc1, int loc2) const
-	{
-		if (!existing_path[agent].size() > timestep)
-		{
-			if (existing_path[agent][timestep] == loc2)
-				return 0; //follow current path as much as possible
-		}
-		return heuristic[loc1][loc2];
-	}
-
 	int getDegree(int loc) const
 	{
 		assert(loc >= 0 && loc < env->map.size() && env->map[loc] != 1);

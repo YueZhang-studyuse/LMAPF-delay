@@ -110,7 +110,8 @@ protected:
     bool planner_initialize();
 	virtual void update_tasks() = 0;
 
-    void sync_shared_env();
+    virtual void sync_shared_env() = 0;
+    void execution_with_delay(vector<Path> curr_commits);
 
     list<Task> move(vector<Action>& actions);
     bool valid_moves(vector<State>& prev, vector<Action>& next);
@@ -166,6 +167,7 @@ private:
     vector<deque<Task>> task_queue;
 
 	void update_tasks();
+    void sync_shared_env(){}
 };
 
 
@@ -197,6 +199,7 @@ private:
     deque<Task> task_queue;
 
 	void update_tasks();
+    void sync_shared_env(){}
 };
 
 
@@ -232,4 +235,5 @@ private:
     int task_id = 0;
 
 	void update_tasks();
+    void sync_shared_env();
 };
