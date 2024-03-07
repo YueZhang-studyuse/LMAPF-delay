@@ -53,15 +53,16 @@ void InfAssignSystem::sync_shared_env()
     {
         env->goal_locations[i].clear();
         //check if current assigned task will be finished or not
-        list<Task> copy_tasks;
+        list<pair<int,int>> copy_tasks;
         for(auto& task: assigned_tasks[i])
         {
-            copy_tasks.push_back({task.location, task.t_assigned });//copy current assigned task
+            int loc = task.location;
+            copy_tasks.push_back(make_pair(loc, task.t_assigned));//copy current assigned task
         }
         //dummy simulation of task finishing with inf assign system
         for (auto loc: curr_commits[i])
         {
-            if (loc.location == copy_tasks.front().location)
+            if (loc.location == copy_tasks.front().first)
                 copy_tasks.pop_front();
         }
         int counter = task_counter[i]; 
@@ -71,17 +72,22 @@ void InfAssignSystem::sync_shared_env()
             int c = counter * num_of_agents + i;
             int loc = tasks[c%tasks_size];
             Task task(task_id+id,loc,timestep,i);
-            copy_tasks.push_back(task);
+            copy_tasks.push_back(make_pair(loc,timestep));
             id++;
             counter++;
         }
-        for(auto& task: copy_tasks)
+        for(auto task: copy_tasks)
         {
-            env->goal_locations[i].push_back({task.location, task.t_assigned });
+            env->goal_locations[i].push_back({task.first, task.second });
         }
     }
     env->curr_timestep = timestep+commit_window;
     //predict start
+    if (timestep == 0)
+    {
+        env->curr_states = starts;
+        return;
+    }
     for (int i = 0; i < num_of_agents; i++)
     {
         env->curr_states[i].location = env->unexecuted_paths[i].front().location;
@@ -151,7 +157,7 @@ void BaseSystem::execution_simulate()
     SimulateMCP postmcp(map.map.size(),1);
     {
         vector<Path*> temp;
-        temp.resize(curr_commits.size()+1);
+        temp.resize(curr_commits.size());
         for (int a = 0; a < curr_commits.size(); a++)
         {
             curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
@@ -228,7 +234,7 @@ void BaseSystem::simulate(int simulation_time)
 
         for (int agent = 0; agent < num_of_agents; agent++) //remove the current position
         {
-            curr_commits.erase(curr_commits.begin());
+            curr_commits[agent].erase(curr_commits[agent].begin());
         }
 
         for (int i = 1; i <= commit_window; i++)
@@ -251,7 +257,7 @@ void BaseSystem::simulate(int simulation_time)
                     actions[agent] = Action::WA;
                 else
                     actions[agent] = Action::N;
-                curr_commits.erase(curr_commits.begin());
+                curr_commits[agent].erase(curr_commits[agent].begin());
             }
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
             
@@ -268,6 +274,16 @@ void BaseSystem::simulate(int simulation_time)
             {
                 break;
             }
+        }
+        //upate moves that will not be execute
+        for (int i = 0; i < num_of_agents; i++)
+        {
+            env->unexecuted_paths[i].clear();
+            for (int t = commit_window; t < curr_commits[i].size(); t++)
+            {
+                env->unexecuted_paths[i].push_back(curr_commits[i][t]);
+            }
+            curr_commits[i].resize(commit_window);
         }
     }
 

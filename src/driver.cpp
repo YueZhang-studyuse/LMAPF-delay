@@ -35,12 +35,6 @@ void sigint_handler(int a)
 
 int main(int argc, char **argv)
 {
-#ifdef PYTHON
-    std::cout<<"Using Python="<<PYTHON<<std::endl;
-#if PYTHON
-    pybind11::initialize_interpreter();
-#endif
-#endif
     // Declare the supported options.
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
@@ -86,6 +80,7 @@ int main(int argc, char **argv)
     MAPFPlanner *planner = nullptr;
 
     auto input_json_file = vm["inputFile"].as<std::string>();
+    planner = new MAPFPlanner();
     json data;
     std::ifstream f(input_json_file);
     try
