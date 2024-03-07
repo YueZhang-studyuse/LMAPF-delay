@@ -115,6 +115,7 @@ protected:
 
     list<Task> move(vector<Action>& actions);
     bool valid_moves(vector<State>& prev, vector<Action>& next);
+    void execution_simulate();
 
     void log_preprocessing(bool succ);
     void log_event_assigned(int agent_id, int task_id, int timestep);

@@ -22,7 +22,7 @@ public:
     void print(int loc);
     void printAgentTime(int num_agents);
     void printAgentNoWaitTime(int num_agents);
-    void simulate(vector<Path*>& paths, const vector<bool> & delays);
+    void simulate(vector<Path*>& paths, const vector<vector<bool>> & delays);
 
     std::set<int> delayed_agents;
     int count_pairs(vector<Path>& paths){

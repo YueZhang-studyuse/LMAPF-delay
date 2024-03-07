@@ -20,10 +20,10 @@ public:
     virtual void initialize(int preprocess_time_limit);
 
     // return next states for all agents
-    virtual void plan(int time_limit, std::vector<Action> & plan);
+    virtual void plan(int time_limit);
 
     virtual void loadPaths();
-    //virtual void plan_commit(vector<Action> & actions);
+    virtual void planner_commit(vector<Path>& curr_commits); //return additional wait when runtime > timelimit
 
     int commit = 1;
     int remain_commit = 1;

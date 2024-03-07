@@ -1,7 +1,7 @@
 #include "DelaySimulation.h"
 
 
-void SimulateMCP::simulate(vector<Path*>& paths, const vector<bool> & delays)
+void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & delays)
 {
     vector<Path> path_copy; 
     path_copy.resize(paths.size());
@@ -30,7 +30,10 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<bool> & delays)
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
-            moveAgent(path_copy, paths, p, t, delays);
+            if (t < delays.size())
+                moveAgent(path_copy, paths, p, t, delays[t]);
+            else
+                moveAgent(path_copy, paths, p, t, std::vector<bool>{false});
         }
         //cout<<endl;
 
@@ -113,7 +116,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     }
 
     //check delay here
-    if (t == 0 && delay[i]) //getting delaied at timestep 0->1 (current implementation for window = 1 only)
+    if (delay[i]) //getting delaied at timestep 0->1 (current implementation for window = 1 only)
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
@@ -247,7 +250,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             if ( 
             paths_copy[first_agent].size() == t + 1 &&  // we have not made the movement decision for the first agent
             paths_copy[first_agent][t].location == loc &&
-            (t != 1 || !delay[first_agent]))  // the fist agent is already at loc
+            (!delay[first_agent]))  // the fist agent is already at loc
             {
                 auto p2 = std::find(unfinished_agents.begin(), unfinished_agents.end(), first_agent);
                 assert(p2 != unfinished_agents.end());
