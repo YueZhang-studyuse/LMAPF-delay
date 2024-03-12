@@ -26,18 +26,18 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
         cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
-        
+
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
-            if (t < delays.size())
-                moveAgent(path_copy, paths, p, t, delays[t]);
+            if (t <= delays.size() && t>0)
+                moveAgent(path_copy, paths, p, t, delays[t-1]);
             else
                 moveAgent(path_copy, paths, p, t, std::vector<bool>{false});
         }
         //cout<<endl;
 
-        //cout<<"unfinished: "<< unfinished_agents.size() <<endl;
+        cout<<"unfinished: "<< unfinished_agents.size() <<endl;
 
         // if (t > window_size) // no need to check if all agents stops in window, as collision not allowed.
         //     continue;
@@ -75,9 +75,6 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
 {
 
     int i = *p;
-
-    if (delay[i])
-        cout<<"delaied "<<i<<endl;
 
     //cout <<"work on agent "<<i<<" at "<<t<<endl;
     if (paths_copy[i].size() == t + 2)  // we have already made the movement decision for the agent
@@ -120,7 +117,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
-        //cout<<"find delaied"<<endl;
+        //cout<<"find delaied"<<i<<endl;
         return false;
     }
 
@@ -142,7 +139,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             paths_copy[i].push_back(paths_copy[i].back());
             ++p;
             // cout <<"["<< i <<",wv(a)],";
-            // cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
+            //cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
             return false;
         }
         //and next location record more than one agent in top of mcp (vertex conflict may occur), then wait
@@ -150,7 +147,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             paths_copy[i].push_back(paths_copy[i].back());
             ++p;
             // cout <<"["<< i <<",wv],";
-            // cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
+            //cout<< i <<" stop at" << t << "to avoid vertex conflict on  "<< loc <<endl; 
             return false;
         }
         //if edge conflict may occur, then wait
@@ -178,7 +175,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     ++p;
                     // cout <<"["<< i <<",we],";
 
-                    // cout<< i <<" stop at" << t << "to avoid edge conflict on "<< previous << " - "<< loc <<endl; 
+                    //cout<< i <<" stop at" << t << "to avoid edge conflict on "<< previous << " - "<< loc <<endl; 
                     return false;
                 }
 
@@ -226,6 +223,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             && (*std::next(copy_mcp[loc].begin())).size() > 1){
             paths_copy[i].push_back(paths_copy[i].back()); // stay still
             ++p;
+            //cout<<"two agents in one vertex"<<endl;
                     // cout <<"["<< i <<",rv],";
             return false;
         }
@@ -276,6 +274,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
+                //cout<<"result delay "<<i<<endl;
                 return false;
             }
         }
