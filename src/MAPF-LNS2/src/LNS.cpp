@@ -393,9 +393,9 @@ void LNS::checkReplan()
     {
         if (agent.path.empty() || agent.path.front().location != agent.path_planner->start_location)
         {
-            if (agent.path.front().location != agent.path_planner->start_location)
+            if (!agent.path.empty())
             {
-                cout<<"replan for agent "<<agent.id<<" due to delaies"<<endl;
+                cout<<"replan for agent "<<agent.id<<" due to delaies "<<agent.path.front().location<<" "<<agent.path_planner->start_location<<endl;
             }
             neighbor.agents.emplace_back(agent.id);
             agent.path.clear();

@@ -82,12 +82,8 @@ void InfAssignSystem::sync_shared_env()
         }
     }
     env->curr_timestep = timestep+commit_window;
+    env->curr_states.resize(num_of_agents);
     //predict start
-    if (timestep == 0)
-    {
-        env->curr_states = starts;
-        return;
-    }
     for (int i = 0; i < num_of_agents; i++)
     {
         env->curr_states[i].location = env->unexecuted_paths[i].front().location;
@@ -143,15 +139,18 @@ void BaseSystem::log_event_finished(int agent_id, int task_id, int timestep)
 void BaseSystem::execution_simulate()
 {
     vector<vector<bool>> delay; // delay within window
-    delay.resize(num_of_agents);
+    delay.resize(commit_window);
     int current_time = curr_states[0].timestep;
-    for (int i = 0; i < num_of_agents; i++)
+    for (int t = 0; t < commit_window; t++)
     {
-        delay[i].resize(commit_window);
-        for (int t = 0; t < commit_window; t++)
+        delay[t].resize(num_of_agents);
+        cout<<"delay of time "<<t<<": ";
+        for (int i = 0; i < num_of_agents; i++)
         {
-            delay[i][t] = simulation_delay[i][current_time+t];
+            delay[t][i] = simulation_delay[i][current_time+t];
+            cout<<delay[t][i]<<" ";
         }
+        cout<<endl;
     }
     
     SimulateMCP postmcp(map.map.size(),1);
@@ -188,10 +187,21 @@ void BaseSystem::simulate(int simulation_time)
     auto end = std::chrono::steady_clock::now();
     auto diff = end-start; //actual planning time
     planner_times.push_back(std::chrono::duration<double>(diff).count());
-    int exceed_time = int(planner_times.back()+0.9); //we allow 0.1s exceed time
+    int exceed_time = int(planner_times.back()+0.9 - plan_time_limit); //we allow 0.1s exceed time
 
     //commit k
     planner->planner_commit(curr_commits); //push back the curr commits
+
+    //upate moves that will not be execute with start location
+    for (int i = 0; i < num_of_agents; i++)
+    {
+        env->unexecuted_paths[i].clear();
+        // for (int t = commit_window-1; t < curr_commits[i].size(); t++)
+        // {
+        env->unexecuted_paths[i].push_back(curr_commits[i].back());
+        // }
+        // curr_commits[i].resize(commit_window);
+    }
 
 
     for (; timestep < simulation_time; ) //start execution
@@ -258,7 +268,9 @@ void BaseSystem::simulate(int simulation_time)
                 else
                     actions[agent] = Action::N;
                 curr_commits[agent].erase(curr_commits[agent].begin());
+                cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
             }
+            cout<<endl;
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
             
             cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;
@@ -275,11 +287,11 @@ void BaseSystem::simulate(int simulation_time)
                 break;
             }
         }
-        //upate moves that will not be execute
+        //upate moves that will not be execute with start location
         for (int i = 0; i < num_of_agents; i++)
         {
             env->unexecuted_paths[i].clear();
-            for (int t = commit_window; t < curr_commits[i].size(); t++)
+            for (int t = commit_window-1; t < curr_commits[i].size(); t++)
             {
                 env->unexecuted_paths[i].push_back(curr_commits[i][t]);
             }

@@ -153,10 +153,10 @@ int main(int argc, char **argv)
 
     system_ptr->simulate(vm["simulationTime"].as<int>());
 
-    if (!vm["evaluationMode"].as<bool>())
-    {
-        system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputSimple"].as<bool>());
-    }
+    // if (!vm["evaluationMode"].as<bool>())
+    // {
+    system_ptr->saveResults(vm["output"].as<std::string>(),vm["outputSimple"].as<bool>());
+    //}
 
     delete model;
     delete logger;

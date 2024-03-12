@@ -26,7 +26,7 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
         cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
-
+        
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
@@ -76,8 +76,8 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
 
     int i = *p;
 
-    // if (delay[i])
-    //     cout<<"delaied "<<i<<endl;
+    if (delay[i])
+        cout<<"delaied "<<i<<endl;
 
     //cout <<"work on agent "<<i<<" at "<<t<<endl;
     if (paths_copy[i].size() == t + 2)  // we have already made the movement decision for the agent
