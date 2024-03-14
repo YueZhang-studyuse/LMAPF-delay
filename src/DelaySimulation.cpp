@@ -112,19 +112,19 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
         }
     }
 
-    //check delay here
-    if (delay[i]) 
-    {
-        paths_copy[i].push_back(paths_copy[i].back());
-        ++p;
-        //cout<<"find delaied "<<i<<endl;
-        return false;
-    }
-
     // check mcp to determine whether the agent should move or wait
     int loc = paths[i]->at(no_wait_time[i][copy_agent_time[i]]).location;
     int previous = paths[i]->at(no_wait_time[i][copy_agent_time[i] - 1]).location;
     assert(!copy_mcp[loc].empty());
+
+    //check delay here
+    if (loc != previous && delay[i]) 
+    {
+        paths_copy[i].push_back(paths_copy[i].back());
+        ++p;
+        cout<<"find delaied "<<i<<endl;
+        return false;
+    }
 
     // if t is in the window, 
     if (t <= window_size){
@@ -274,7 +274,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
-                //cout<<"result delay "<<i<<endl;
+                cout<<"result delay "<<i<<endl;
                 return false;
             }
         }
