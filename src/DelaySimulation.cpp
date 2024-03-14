@@ -33,29 +33,29 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
             if (t <= delays.size() && t>0)
                 moveAgent(path_copy, paths, p, t, delays[t-1]);
             else
-                moveAgent(path_copy, paths, p, t, std::vector<bool>{false});
+                moveAgent(path_copy, paths, p, t, std::vector<bool>(paths.size(),false));
         }
         //cout<<endl;
 
-        cout<<"unfinished: "<< unfinished_agents.size() <<endl;
+        //cout<<"unfinished: "<< unfinished_agents.size() <<endl;
 
-        // if (t > window_size) // no need to check if all agents stops in window, as collision not allowed.
-        //     continue;
+        if (t <= window_size) // no need to check if all agents stops in window, as collision not allowed.
+            continue;
 
-        // bool no_move = true;
+        bool no_move = true;
 
-        // for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();p++) {
-        //     if (copy_agent_time[*p] != before[*p]){
-        //         no_move = false;
-        //         break;
-        //     }
-        // } 
-        // if (no_move && !unfinished_agents.empty()){
-        //     cout<<"Error: No agent moves at "<<t<<endl;
-        //     print_mcp_detail(paths);
+        for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();p++) {
+            if (copy_agent_time[*p] != before[*p]){
+                no_move = false;
+                break;
+            }
+        } 
+        if (no_move && !unfinished_agents.empty()){
+            cout<<"Error: No agent moves at "<<t<<endl;
+            print_mcp_detail(paths);
 
-        //     _exit(1);
-        // }       
+            _exit(1);
+        }       
 
         
     }
@@ -113,7 +113,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     }
 
     //check delay here
-    if (delay[i]) //getting delaied at timestep 0->1 (current implementation for window = 1 only)
+    if (delay[i]) 
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
