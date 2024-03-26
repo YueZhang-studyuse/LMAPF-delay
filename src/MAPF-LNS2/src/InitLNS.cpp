@@ -344,8 +344,8 @@ bool InitLNS::getInitialSolution()
                  ", LL nodes = " << agents[id].path_planner->getNumExpanded() <<
                  ", remaining time = " << time_limit - runtime << " seconds. " << endl;
         }
-        if (runtime > time_limit)
-            break;
+        // if (runtime > time_limit)
+        //     break;
     }
 
     num_of_colliding_pairs = colliding_pairs.size();
