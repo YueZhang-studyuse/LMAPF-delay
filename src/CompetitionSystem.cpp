@@ -158,17 +158,15 @@ void BaseSystem::execution_simulate()
     }
     
     SimulateMCP postmcp(map.map.size(),1);
+    vector<Path*> temp;
+    temp.resize(curr_commits.size());
+    for (int a = 0; a < curr_commits.size(); a++)
     {
-        vector<Path*> temp;
-        temp.resize(curr_commits.size());
-        for (int a = 0; a < curr_commits.size(); a++)
-        {
-            curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
-            temp[a] = &(curr_commits[a]);
-        }
-        postmcp.build(temp);
-        postmcp.simulate(temp,delay);
+        curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
+        temp[a] = &(curr_commits[a]);
     }
+    postmcp.build(temp);
+    postmcp.simulate(temp,delay);
     postmcp.clear();
 }
 

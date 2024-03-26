@@ -1,4 +1,7 @@
 #include "DelaySimulation.h"
+// #include "nlohmann/json.hpp"
+
+// using json = nlohmann::ordered_json;
 
 
 void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & delays)
@@ -35,6 +38,8 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
             else
                 moveAgent(path_copy, paths, p, t, std::vector<bool>(paths.size(),false));
         }
+        // if (t == 1)
+        //  saveResults("delay_text.trace.json");
         //cout<<endl;
 
         //cout<<"unfinished: "<< unfinished_agents.size() <<endl;
@@ -57,7 +62,6 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
             _exit(1);
         }       
 
-        
     }
 
     for (int i=0;i<paths.size();i++){
@@ -117,12 +121,21 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     int previous = paths[i]->at(no_wait_time[i][copy_agent_time[i] - 1]).location;
     assert(!copy_mcp[loc].empty());
 
+    // // Decision temp("checking", previous/map_col, previous%map_col, i);
+    // // temp.move_tox = loc/map_col;
+    // // temp.move_toy = loc%map_col;
+    // decisions.push_back(Decision("checking", previous/map_col, previous%map_col, i,"blue"));
+    // decisions.back().move_tox = loc/map_col;
+    // decisions.back().move_toy = loc%map_col;
+    // decisions.back().prior_order = *(copy_mcp[loc].begin()->begin());
+
     //check delay here
     if (loc != previous && delay[i]) 
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
         cout<<"find delaied "<<i<<endl;
+        // decisions.push_back(Decision("delay", previous/map_col, previous%map_col, i,"red"));
         return false;
     }
 
@@ -209,7 +222,9 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
         
         copy_agent_time[i]++;
         ++p;
-        //cout <<"["<< i <<",m],";
+        // //cout <<"["<< i <<",m],";
+        // decisions.push_back(Decision ("cleared", previous/map_col, previous%map_col, i,"white"));
+        // decisions.push_back(Decision("finished", loc/map_col, loc%map_col, i,"grey"));
         return true;
     }
 
@@ -275,11 +290,15 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                 ++p;
                 // cout <<"["<< i <<",rf],";
                 cout<<"result delay "<<i<<endl;
+                // Decision temp("delay", previous/map_col, previous%map_col, i,"red");
+                // decisions.push_back(temp);
                 return false;
             }
         }
         ++p;
         // cout <<"["<< i <<",rm],";
+        // decisions.push_back(Decision ("cleared", previous/map_col, previous%map_col, i,"white"));
+        // decisions.push_back(Decision ("finished", loc/map_col, loc%map_col, i,"grey"));
 
         return true;
 
@@ -287,6 +306,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     
     paths_copy[i].push_back(paths_copy[i].back()); // stay still
     ++p; // next agent
+    // decisions.push_back(Decision ("delay", loc/map_col, loc%map_col, i,"red"));
     return false;
 }
 
@@ -425,3 +445,76 @@ void SimulateMCP::printAgentNoWaitTime(int num_agents)
     }
     cout << "================== End Time ==================" << endl;
 }
+
+// void SimulateMCP::saveResults(const string &fileName)
+// {
+//     // json components;
+//     // json component;
+//     // component["$"] = "rect";
+//     // component["fill"] = "{{$.color[$.event.type]}}";
+//     // component["width"] = 1;
+//     // component["height"] = 1;
+//     // component["x"] =  "{{'x' in $.event ? $.event.x : 0}}";
+//     // component["y"] = "{{'y' in $.event ? $.event.y : 0}}";
+
+//     // json components_color = json::array();
+//     // components["my-component"] = json::array();
+//     // components["my-component"].push_back(component);
+    
+//     // json views;
+//     // json ctemp = json::array();
+//     // json color;
+//     // color["$"] = "my-component";
+//     // color["color"] = "{{ {finished: 'grey', checking: 'yellow', delay: 'red'} }}";
+//     // ctemp.push_back(color);
+//     // views["main"]["components"] = ctemp;
+//     // json js;
+//     // js["version"] = "1.0.5";
+//     // js["render"] = 
+//     // {
+//     // {"components", components},
+//     // {"views",  views}
+//     // };
+
+//     json component;
+//     component["$"] = "rect";
+//     component["fill"] = "{{$.color[$.event.type]}}";
+//     component["width"] = 1;
+//     component["height"] = 1;
+//     component["x"] =  "{{'x' in $.event ? $.event.x : 0}}";
+//     component["y"] = "{{'y' in $.event ? $.event.y : 0}}";
+//     json views;
+//     json ctemp = json::array();
+//     ctemp.push_back(component);
+//     views["main"]["components"] = ctemp;
+//     json js;
+//     js["version"] = "1.0.5";
+//     js["render"] = 
+//     {
+//     {"components", {}},
+//     {"views",  views}
+//     };
+
+//   json events = json::array();
+//   for (auto d: decisions)
+//   {
+//     json temp;
+//     temp["type"] = d.type;
+//     temp["y"] = d.x;
+//     temp["x"] = d.y;
+//     if (d.move_tox != -1)
+//     {
+//         temp["move_toy"] = d.move_tox;
+//         temp["move_tox"] = d.move_toy;
+//     }
+//     if (d.prior_order != -1)
+//         temp["prior_order"] = d.prior_order;
+//     temp["id"] = d.agent_id;
+//     temp["color"] = d.color;
+
+//     events.push_back(temp);
+//   }
+//   js["events"] = events;
+//   std::ofstream f(fileName,std::ios_base::trunc |std::ios_base::out);
+//     f << std::setw(4) << js;
+// }

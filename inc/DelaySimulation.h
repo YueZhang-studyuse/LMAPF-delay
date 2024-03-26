@@ -6,9 +6,35 @@
 
 class SimulateMCP {
 public:
+    // struct Decision
+    // {
+    //     std::string type;
+    //     std::string color;
+    //     int x;
+    //     int y;
+    //     int move_tox = -1;
+    //     int move_toy = -1;
+    //     int prior_order = -1;
+    //     int agent_id;
+    //     int delay_by = -1;
+    //     Decision(std::string dtype, int dx, int dy, int did, string c)
+    //     {
+    //         type = dtype;
+    //         x = dx;
+    //         y = dy;
+    //         agent_id = did;
+    //         color = c;
+    //     }
+    // };
+
+    // int map_col = 32;
+
+    // std::list<Decision> decisions;
+
     vector<int> to_go;
 
     SimulateMCP(int map_size, int window_size):map_size(map_size),window_size(window_size){};
+    void saveResults(const string &fileName);
 
     void build(vector<Path*>& paths);
     void clear(void)
