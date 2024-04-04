@@ -33,8 +33,8 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
-            if (t <= delays.size() && t>0)
-                moveAgent(path_copy, paths, p, t, delays[t-1]);
+            if (t < delays.size())
+                moveAgent(path_copy, paths, p, t, delays[t]);
             else
                 moveAgent(path_copy, paths, p, t, std::vector<bool>(paths.size(),false));
         }
@@ -80,7 +80,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
 
     int i = *p;
 
-    //cout <<"work on agent "<<i<<" at "<<t<<endl;
+    //cout <<"work on agent "<<i<<" at "<<t<<" delay "<<delay[i]<<endl;
     if (paths_copy[i].size() == t + 2)  // we have already made the movement decision for the agent
     {
         ++p;
@@ -96,7 +96,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
         {
             assert(copy_mcp[loc].front().count(i)>0);
 
-            if (t <= window_size)
+            if (t < window_size)
             {
                 paths_copy[i].push_back(paths_copy[i].back());
                 ++p;
@@ -128,7 +128,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     // decisions.back().move_tox = loc/map_col;
     // decisions.back().move_toy = loc%map_col;
     // decisions.back().prior_order = *(copy_mcp[loc].begin()->begin());
-
+    //cout<<"curr "<<previous<<" to "<<loc<<endl;
     //check delay here
     if (loc != previous && delay[i]) 
     {
