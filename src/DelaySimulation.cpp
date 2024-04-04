@@ -49,13 +49,21 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
 
         bool no_move = true;
 
-        for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();p++) {
-            if (copy_agent_time[*p] != before[*p]){
+        for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();p++) 
+        {
+            if (copy_agent_time[*p] != before[*p])
+            {
+                no_move = false;
+                break;
+            }
+            if (delays[t][*p])
+            {
                 no_move = false;
                 break;
             }
         } 
-        if (no_move && !unfinished_agents.empty()){
+        if (no_move && !unfinished_agents.empty())
+        {
             cout<<"Error: No agent moves at "<<t<<endl;
             print_mcp_detail(paths);
 

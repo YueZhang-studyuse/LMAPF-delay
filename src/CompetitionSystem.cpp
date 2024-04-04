@@ -110,22 +110,22 @@ void BaseSystem::log_event_finished(int agent_id, int task_id, int timestep)
 void BaseSystem::execution_simulate()
 {
     vector<vector<bool>> delay; // delay within window
-    delay.resize(commit_window);
     int current_time = curr_states[0].timestep;
+    delay.resize(simulation_delay[0].size() - current_time);
     int dcount = 0;
-    for (int t = 0; t < commit_window; t++)
+    for (int t = 0; t < delay.size(); t++)
     {
         delay[t].resize(num_of_agents);
-        cout<<"delay of time "<<t<<": ";
+        //cout<<"delay of time "<<t<<": ";
         for (int i = 0; i < num_of_agents; i++)
         {
             delay[t][i] = simulation_delay[i][current_time+t];
-            cout<<delay[t][i]<<" ";
+            // cout<<delay[t][i]<<" ";
             if (delay[t][i])
                 dcount++;
         }
-        cout<<endl;
-        cout<<"original delay count "<<dcount<<endl;
+        // cout<<endl;
+        // cout<<"original delay count "<<dcount<<endl;
     }
     
     SimulateMCP postmcp(map.map.size(),1);
