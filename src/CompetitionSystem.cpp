@@ -1,12 +1,12 @@
 #include <cmath>
 #include "CompetitionSystem.h"
 #include <boost/tokenizer.hpp>
-//#include "nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 #include <functional>
 #include <Logger.h>
 #include <DelaySimulation.h>
 
-//using json = nlohmann::ordered_json;
+using json = nlohmann::ordered_json;
 
 
 list<Task> BaseSystem::move(vector<Action>& actions)
@@ -156,18 +156,36 @@ void BaseSystem::execution_simulate()
         cout<<endl;
         cout<<"original delay count "<<dcount<<endl;
     }
-    
-    SimulateMCP postmcp(map.map.size(),1);
-    vector<Path*> temp;
-    temp.resize(curr_commits.size());
+
+    SimulateLDF postldf(commit_window);
     for (int a = 0; a < curr_commits.size(); a++)
     {
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
-        temp[a] = &(curr_commits[a]);
     }
-    postmcp.build(temp);
-    postmcp.simulate(temp,delay);
-    postmcp.clear();
+    postldf.init(curr_commits);
+    postldf.simulate(delay);
+    //update curr_commit and unexecuted path
+    for (int a = 0; a < curr_commits.size(); a++)
+    {
+        curr_commits[a].clear();
+        curr_commits[a].resize(postldf.simulated_path[a].size());
+        int index = 0;
+        for (auto loc: postldf.simulated_path[a])
+        {
+            curr_commits[a][index].location = loc;
+            index++;
+        }
+        env->unexecuted_paths[a].clear();
+        env->unexecuted_paths[a].resize(postldf.unexecuted_path[a].size()+1);
+        env->unexecuted_paths[a][0].location = postldf.simulated_path[a].back();
+        index = 1;
+        for (auto loc: postldf.unexecuted_path[a])
+        {
+            env->unexecuted_paths[a][index].location = loc;
+        }
+    }
+    postldf.clear();
+
 }
 
 void BaseSystem::simulate(int simulation_time)
@@ -289,16 +307,16 @@ void BaseSystem::simulate(int simulation_time)
                 break;
             }
         }
-        //upate moves that will not be execute with start location
-        for (int i = 0; i < num_of_agents; i++)
-        {
-            env->unexecuted_paths[i].clear();
-            for (int t = commit_window-1; t < curr_commits[i].size(); t++)
-            {
-                env->unexecuted_paths[i].push_back(curr_commits[i][t]);
-            }
-            curr_commits[i].resize(commit_window);
-        }
+        // //upate moves that will not be execute with start location
+        // for (int i = 0; i < num_of_agents; i++)
+        // {
+        //     env->unexecuted_paths[i].clear();
+        //     for (int t = commit_window-1; t < curr_commits[i].size(); t++)
+        //     {
+        //         env->unexecuted_paths[i].push_back(curr_commits[i][t]);
+        //     }
+        //     curr_commits[i].resize(commit_window);
+        // }
     }
 
     cout << std::endl << "Done!" << std::endl;
