@@ -145,15 +145,15 @@ void BaseSystem::execution_simulate()
     for (int t = 0; t < commit_window; t++)
     {
         delay[t].resize(num_of_agents);
-        cout<<"delay of time "<<t<<": ";
+        //cout<<"delay of time "<<t<<": ";
         for (int i = 0; i < num_of_agents; i++)
         {
             delay[t][i] = simulation_delay[i][current_time+t];
-            cout<<delay[t][i]<<" ";
+            //cout<<delay[t][i]<<" ";
             if (delay[t][i])
                 dcount++;
         }
-        cout<<endl;
+        //cout<<endl;
         cout<<"original delay count "<<dcount<<endl;
     }
 
@@ -182,6 +182,7 @@ void BaseSystem::execution_simulate()
         for (auto loc: postldf.unexecuted_path[a])
         {
             env->unexecuted_paths[a][index].location = loc;
+            index++;
         }
     }
     postldf.clear();
@@ -288,9 +289,9 @@ void BaseSystem::simulate(int simulation_time)
                 else
                     actions[agent] = Action::N;
                 curr_commits[agent].erase(curr_commits[agent].begin());
-                cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
+                //cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
             }
-            cout<<endl;
+            //cout<<endl;
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
             
             cout << new_finished_tasks.size() << " tasks has been finished in this timestep" << std::endl;

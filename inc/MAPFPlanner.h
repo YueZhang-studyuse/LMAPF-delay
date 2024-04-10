@@ -28,6 +28,8 @@ public:
     int commit = 1;
     int remain_commit = 1;
 
+    bool last_failed = false;
+
     Instance instance;
     LNS* lns = nullptr;
 

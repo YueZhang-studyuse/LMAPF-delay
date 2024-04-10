@@ -37,7 +37,25 @@ void MAPFPlanner::loadPaths()
     if (initial_success && !initial_run)
     {
         lns->clearAll("Adaptive");
-        //current we simply load future path without push back the unexeuted part
+        //current we push back the unexeuted part
+        int d_count = 0;
+        for (int a = 0; a < env->num_of_agents; a++)
+        {
+            if (env->unexecuted_paths[a].size() > 1)
+            {
+                //future_paths[a].pop_front();
+                //cout<<"a "<<a<<" "<<env->unexecuted_paths[a].size()<<endl;
+                d_count++;
+                // for (int i = env->unexecuted_paths[a].size() - 1; i >= 0; i--)
+                // {
+                //     //cout<< env->unexecuted_paths[a][i].location<<" ";
+                //     future_paths[a].push_front(env->unexecuted_paths[a][i].location);
+                // }
+            }
+            // if (env->unexecuted_paths[a].size() > 1)
+            //     cout<<endl;
+        }
+        cout<<"final delay caused "<<d_count<<endl;
         lns->loadPaths(future_paths);
         lns->checkReplan();
     }
@@ -72,7 +90,7 @@ void MAPFPlanner::plan(int time_limit)
         }
     }
 
-    if (algo == mapf_algo::LACAMLNS)
+    else if (algo == mapf_algo::LACAMLNS || last_failed)
     {
         lns->setRuntimeLimit(time_limit);
         lns->setIterations(MAX_TIMESTEP);
@@ -96,15 +114,18 @@ void MAPFPlanner::plan(int time_limit)
         }
         else 
         {
+            if (last_failed)
+                cout<<"switch to replan all"<<endl;
             lns->setRuntimeLimit(time_limit);
             lns->fixInitialSolutionWithLaCAM();
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
+            last_failed = false;
         }
     }
 
-    if (algo == mapf_algo::LACAMLNS2)
+    else if (algo == mapf_algo::LACAMLNS2)
     {
         lns->setRuntimeLimit(time_limit);
         lns->setIterations(MAX_TIMESTEP);
@@ -131,7 +152,8 @@ void MAPFPlanner::plan(int time_limit)
             //lns->clearAll("Adaptive");
             //lns->loadPaths(future_paths);
             lns->setRuntimeLimit(time_limit);
-            lns->fixInitialSolutionWithLNS2();
+            if (!lns->fixInitialSolutionWithLNS2())
+                last_failed = true;
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();

@@ -27,6 +27,15 @@ void SimulateLDF::init(vector<Path> curr_commit)
 void SimulateLDF::simulate(const vector<vector<bool>> & delays)
 {
     cout<<"Start "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
+    // for (int a = 0; a < agents.size(); a++)
+    // {
+    //     cout<<"agent a "<<a<<" path: ";
+    //     for (auto p: unexecuted_path[a])
+    //     {
+    //         cout<<p<<" ";
+    //     }
+    //     cout<<endl;
+    // }
     for (int t = 0; t < simulate_time; t++)
     {
         cout<<"simulating t = "<<t<<endl;
@@ -109,6 +118,15 @@ void SimulateLDF::simulate(const vector<vector<bool>> & delays)
             }
         }
     }
+    // for (int a = 0; a < agents.size(); a++)
+    // {
+    //     cout<<"agent a "<<a<<" path: ";
+    //     for (auto p: unexecuted_path[a])
+    //     {
+    //         cout<<p<<" ";
+    //     }
+    //     cout<<endl;
+    // }
 
     cout<<"Simulation done at "<<(float)clock()/(float)CLOCKS_PER_SEC << endl;
     return;
