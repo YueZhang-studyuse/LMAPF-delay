@@ -5,5 +5,5 @@
   "taskFile": "tasks/agent-1000_scen-1.tasks",
   "numTasksReveal": 1,
   "taskAssignmentStrategy": "roundrobin",
-  "delayFile": "../delay/delay-0.009-2.txt"
+  "delayFile": "../delay-2/delay-0.009-2.txt"
 }

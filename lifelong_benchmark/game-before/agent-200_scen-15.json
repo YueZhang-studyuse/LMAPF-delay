@@ -1,8 +1,0 @@
-{
-    "mapFile": "maps/den520d.map",
-    "agentFile": "agents/agent-200_scen-15.agents",
-    "teamSize": 200,
-    "taskFile": "tasks/agent-200_scen-15.tasks",
-    "numTasksReveal": 1,
-    "taskAssignmentStrategy": "roundrobin"
-}
