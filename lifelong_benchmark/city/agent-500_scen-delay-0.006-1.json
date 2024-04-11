@@ -1,0 +1,9 @@
+{
+  "mapFile": "maps/Paris_1_256.map",
+  "agentFile": "agents/agent-500_scen-1.agents",
+  "teamSize": 500,
+  "taskFile": "tasks/agent-500_scen-1.tasks",
+  "numTasksReveal": 1,
+  "taskAssignmentStrategy": "roundrobin",
+  "delayFile": "../delay/delay-0.006-1.txt"
+}

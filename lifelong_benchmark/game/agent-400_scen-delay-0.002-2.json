@@ -1,0 +1,9 @@
+{
+  "mapFile": "maps/ht_mansion_n.map",
+  "agentFile": "agents/agent-400_scen-1.agents",
+  "teamSize": 400,
+  "taskFile": "tasks/agent-400_scen-1.tasks",
+  "numTasksReveal": 1,
+  "taskAssignmentStrategy": "roundrobin",
+  "delayFile": "../delay-2/delay-0.002-2.txt"
+}
