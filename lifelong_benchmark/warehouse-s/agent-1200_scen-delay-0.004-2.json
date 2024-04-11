@@ -1,0 +1,9 @@
+{
+  "mapFile": "maps/warehouse-10-20-10-2-1.map",
+  "agentFile": "agents/agent-1200_scen-1.agents",
+  "teamSize": 1200,
+  "taskFile": "tasks/agent-1200_scen-1.tasks",
+  "numTasksReveal": 1,
+  "taskAssignmentStrategy": "roundrobin",
+  "delayFile": "../delay-2/delay-0.004-2.txt"
+}
