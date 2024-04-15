@@ -80,7 +80,7 @@ public:
     // minimizing the number of conflicts with constraint_table, breaking ties by the path length.
     Path findPath(const ConstraintTable& constraint_table);
 
-	Path findPath(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag) {} //current we do not modify a* cause it is not used
+	Path findPath(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag,int w) {} //current we do not modify a* cause it is not used
 
 
 

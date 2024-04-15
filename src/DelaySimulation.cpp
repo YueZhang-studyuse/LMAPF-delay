@@ -142,7 +142,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
-        cout<<"find delaied "<<i<<endl;
+        //cout<<"find delaied "<<i<<endl;
         // decisions.push_back(Decision("delay", previous/map_col, previous%map_col, i,"red"));
         return false;
     }
@@ -297,7 +297,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
-                cout<<"result delay "<<i<<endl;
+                //cout<<"result delay "<<i<<endl;
                 // Decision temp("delay", previous/map_col, previous%map_col, i,"red");
                 // decisions.push_back(temp);
                 return false;

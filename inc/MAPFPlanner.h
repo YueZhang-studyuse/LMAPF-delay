@@ -26,7 +26,6 @@ public:
     virtual void planner_commit(vector<Path>& curr_commits); //return additional wait when runtime > timelimit
 
     int commit = 1;
-    int remain_commit = 1;
 
     Instance instance;
     LNS* lns = nullptr;
@@ -39,4 +38,12 @@ public:
     mapf_algo algo = mapf_algo::LACAMLNS2;
 
     int mapf_planner;
+
+    //keep track of planning success/failure
+    list<bool> plan_success;
+
+    double decay_factor = 0;
+    double increase_factor = 0;
+    double current_window_factor = 1;
+    int check_window = 20; //how many we check for decide the collision-free window
 };

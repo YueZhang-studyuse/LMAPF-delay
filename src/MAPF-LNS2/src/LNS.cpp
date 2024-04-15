@@ -388,6 +388,7 @@ void LNS::checkReplan()
     int makespan = 0;
 
     initial_collision = false;
+    int delay_count = 0;
 
     for (auto& agent : agents) //also include delaied agent
     {
@@ -395,27 +396,28 @@ void LNS::checkReplan()
         {
             if (!agent.path.empty())
             {
-                cout<<"replan for agent "<<agent.id<<" due to delaies "<<agent.path.front().location<<" "<<agent.path_planner->start_location<<endl;
+                //cout<<"replan for agent "<<agent.id<<" due to delaies "<<agent.path.front().location<<" "<<agent.path_planner->start_location<<endl;
+                delay_count++;
             }
             neighbor.agents.emplace_back(agent.id);
             agent.path.clear();
         }
-        else //check if plan is reached goal or not
+        else 
         {
-            bool reached_goal = false;
-            for (auto p: agent.path)
-            {
-                if (p.location == agent.path_planner->goal_location)
-                {
-                    reached_goal = true;
-                    break;
-                }
-            }
-            if (!reached_goal) 
-            {
-                neighbor.agents.emplace_back(agent.id);
-                agent.path.clear();
-            }
+            // bool reached_goal = false;
+            // for (auto p: agent.path)
+            // {
+            //     if (p.location == agent.path_planner->goal_location)
+            //     {
+            //         reached_goal = true;
+            //         break;
+            //     }
+            // }
+            // if (!reached_goal) 
+            // {
+            //     neighbor.agents.emplace_back(agent.id);
+            //     agent.path.clear();
+            // }
             bool has_collision = false;
             for (auto other : complete_agents)
             {
@@ -438,6 +440,7 @@ void LNS::checkReplan()
             }
         }
     }
+    cout<<"final delay caused "<<delay_count<<endl;
     if (screen == 2)
         cout << complete_agents.size() << " collision-free agents at timestep " << makespan << endl;
 }
@@ -467,6 +470,7 @@ bool LNS::fixInitialSolutionWithLNS2()
         init_lns = new InitLNS(instance, agents, time_limit - ((fsec)(Time::now() - start_time)).count(),
                 replan_algo_name,init_destory_name, neighbor_size, screen);
         init_lns->commit = commit;
+        init_lns->collision_clear_window = this->collision_clear_window;
 
         succ = init_lns->run();
         path_table.reset();
@@ -587,7 +591,7 @@ bool LNS::runPP()
                  << "Agent " << agents[id].id << endl;
         agents[id].path_planner->commit_window = commit;
         //agents[id].path = agents[id].path_planner->findPath(constraint_table);
-        agents[id].path = agents[id].path_planner->findPath(constraint_table, T - ((fsec)(Time::now() - time)).count(),timeout_flag);
+        agents[id].path = agents[id].path_planner->findPath(constraint_table, T - ((fsec)(Time::now() - time)).count(),timeout_flag,collision_clear_window);
         if (timeout_flag)
             break;
         if (agents[id].path.empty())
@@ -1158,6 +1162,8 @@ bool LNS::loadPaths(vector<list<int>> paths)
             continue;
         for(auto location: paths[agent_id])
         {
+            if (agents[agent_id].path.size() > collision_clear_window) //discard future path if we set a collision free window
+                break;
             agents[agent_id].path.emplace_back(location);
         }
         for (int i = paths[agent_id].size(); i <= commit; i++) //we ensure enough locations in commit window

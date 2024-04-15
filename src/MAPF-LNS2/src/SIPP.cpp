@@ -150,8 +150,9 @@ void SIPP::updatePath(const LLNode* goal, vector<PathEntry> &path)
 //     return path;
 // }
 
-Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag)
+Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag, int collision_free_window)
 {
+    //cout<<"collision free "<<collision_free_window<<endl;
     auto start_time = Time::now();
     reset();
     //ReservationTable reservation_table(constraint_table, goal_location);
@@ -192,7 +193,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
             updatePath(curr, path);
             break;
         }
-        else if ((curr->reached_goal || curr->location == goal_location) && // arrive at the goal location or reach goal before
+        else if ((curr->reached_goal || curr->location == goal_location || curr->timestep > collision_free_window) && // arrive at the goal location or reach goal before
                 !curr->wait_at_goal && // not wait at the goal location
                 curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window)) // the agent can hold the this location afterward until window
         {

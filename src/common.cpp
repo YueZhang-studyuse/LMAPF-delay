@@ -38,7 +38,8 @@ ostream& operator<<(ostream& os, const Interval& interval)
     return os;
 }
 
-ostream& operator<<(std::ostream& os, const Path& path)
+
+std::ostream& operator<<(std::ostream& os, const Path& path)
 {
 	for (const auto& state : path)
 	{

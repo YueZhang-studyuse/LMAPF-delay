@@ -45,6 +45,7 @@ public:
     int sum_of_costs = 0;
 
     int commit = 1;
+    int collision_clear_window = MAX_TIMESTEP; //default to be collsion-free for entire path
 
     bool timeout_flag = false;
 

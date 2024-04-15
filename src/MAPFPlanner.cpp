@@ -128,10 +128,10 @@ void MAPFPlanner::plan(int time_limit)
         }
         else 
         {
-            //lns->clearAll("Adaptive");
-            //lns->loadPaths(future_paths);
+            //set one number for exp
+            lns->collision_clear_window = 50;
             lns->setRuntimeLimit(time_limit);
-            lns->fixInitialSolutionWithLNS2();
+            plan_success.push_back(lns->fixInitialSolutionWithLNS2());
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
@@ -165,44 +165,5 @@ void MAPFPlanner::planner_commit(vector<Path>& curr_commits)
     }
 }
 
-// void MAPFPlanner::plan_commit(vector<Action> & actions) 
-// {
-//     actions = std::vector<Action>(env->curr_states.size(), Action::WA);
-//     if (commited_paths[0].empty())
-//     {
-//         for (int i = 0; i < env->num_of_agents; i++)
-//         {
-//             future_paths[i].clear();
-//             commited_paths[i].clear();
-//         }
 
-//         lns->commitPath(commit,commited_paths,future_paths,true,env->curr_timestep);
-//         if (!lns->validateCommitSolution(commited_paths)) //current window has collisions --this should not happen, because we use mcp in lns2
-//         {
-//             cerr<<"errors"<<endl;
-//             exit(-1);
-//         }
-//     }
-
-//     //trans to actions
-//     for (int agent = 0; agent < env->num_of_agents; agent++)
-//     {
-//         int next_loc = commited_paths[agent].front();
-//         int diff = next_loc - env->curr_states[agent].location;
-//         if (diff == 1)
-//             actions[agent] = Action::E;
-//         else if (diff == -1)
-//             actions[agent] = Action::WE;
-//         else if (diff > 0)
-//             actions[agent] = Action::S;
-//         else if (diff == 0)
-//             actions[agent] = Action::WA;
-//         else
-//             actions[agent] = Action::N;
-//         commited_paths[agent].pop_front();
-//     }
-
-//     return;
-
-// }
 

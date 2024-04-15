@@ -36,6 +36,7 @@ InitLNS::InitLNS(const Instance& instance, vector<Agent>& agents, double time_li
 
 bool InitLNS::run()
 {
+    screen = 3;
     start_time = Time::now();
     bool succ = getInitialSolution();
     runtime = ((fsec)(Time::now() - start_time)).count();
@@ -80,8 +81,8 @@ bool InitLNS::run()
         switch (init_destroy_strategy)
         {
             case TARGET_BASED:
-                succ = generateNeighborByTarget();
-                //succ = generateNeighborRandomly();
+                //succ = generateNeighborByTarget();
+                succ = generateNeighborRandomly();
                 break;
             case COLLISION_BASED:
                 succ = generateNeighborByCollisionGraph();
@@ -248,7 +249,7 @@ bool InitLNS::runPP()
     {
         int id = *p;
         //agents[id].path = agents[id].path_planner->findPath(constraint_table);
-        agents[id].path = agents[id].path_planner->findPath(constraint_table, T - ((fsec)(Time::now() - time)).count(),timeout_flag);
+        agents[id].path = agents[id].path_planner->findPath(constraint_table, T - ((fsec)(Time::now() - time)).count(),timeout_flag, collision_clear_window);
         if (timeout_flag)
             break;
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
@@ -325,11 +326,12 @@ bool InitLNS::getInitialSolution()
     }
     int remaining_agents = (int)neighbor.agents.size();
     std::random_shuffle(neighbor.agents.begin(), neighbor.agents.end());
+    bool timeout = false;
     ConstraintTable constraint_table(instance.env->cols, instance.env->map.size(), nullptr, &path_table);
     
     for (auto id : neighbor.agents)
     {
-        agents[id].path = agents[id].path_planner->findPath(constraint_table);
+        agents[id].path = agents[id].path_planner->findPath(constraint_table,MAX_TIMESTEP,timeout,collision_clear_window);
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
         if (agents[id].path_planner->num_collisions > 0)
             updateCollidingPairs(colliding_pairs, agents[id].id, agents[id].path);
@@ -822,7 +824,15 @@ unordered_map<int, set<int>>& InitLNS::findConnectedComponent(const vector<set<i
 void InitLNS::printPath() const
 {
     for (const auto& agent : agents)
-        cout << "Agent " << agent.id<<endl; //<< ": " << agent.path << endl;
+    {
+        cout << "Agent " << agent.id << ": ";//<< agent.path << endl;
+        for (const auto& p: agent.path)
+        {
+            cout<<p.location<<" ";
+        }
+        cout<<endl;
+    }
+        
 }
 
 void InitLNS::printResult()
