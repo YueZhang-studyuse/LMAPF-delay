@@ -58,7 +58,7 @@ for agent in agent_group:
     with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.001-2.json','w') as f:
         json.dump(temp,f,indent=2)
     temp["delayFile"] = "../delay-2/delay-0.002-2.txt"
-    with open('lifelong_benchmark/random/agent-1'+str(agent)+'_scen-delay-0.002-2.json','w') as f:
+    with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.002-2.json','w') as f:
         json.dump(temp,f,indent=2)
     temp["delayFile"] = "../delay-2/delay-0.003-2.txt"
     with open('lifelong_benchmark/random/agent-'+str(agent)+'_scen-delay-0.003-2.json','w') as f:
