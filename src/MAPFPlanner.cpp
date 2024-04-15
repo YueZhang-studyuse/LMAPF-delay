@@ -90,7 +90,7 @@ void MAPFPlanner::plan(int time_limit)
         }
     }
 
-    else if (algo == mapf_algo::LACAMLNS || last_failed)
+    else if (algo == mapf_algo::LACAMLNS)
     {
         lns->setRuntimeLimit(time_limit);
         lns->setIterations(MAX_TIMESTEP);
@@ -114,14 +114,14 @@ void MAPFPlanner::plan(int time_limit)
         }
         else 
         {
-            if (last_failed)
-                cout<<"switch to replan all"<<endl;
+            // if (last_failed)
+            //     cout<<"switch to replan all"<<endl;
             lns->setRuntimeLimit(time_limit);
             lns->fixInitialSolutionWithLaCAM();
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
-            last_failed = false;
+            //last_failed = false;
         }
     }
 
@@ -152,8 +152,9 @@ void MAPFPlanner::plan(int time_limit)
             //lns->clearAll("Adaptive");
             //lns->loadPaths(future_paths);
             lns->setRuntimeLimit(time_limit);
-            if (!lns->fixInitialSolutionWithLNS2())
-                last_failed = true;
+            // if (!lns->fixInitialSolutionWithLNS2())
+            //     last_failed = true;
+            lns->fixInitialSolutionWithLNS2()
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
