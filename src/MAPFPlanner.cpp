@@ -154,7 +154,7 @@ void MAPFPlanner::plan(int time_limit)
             lns->setRuntimeLimit(time_limit);
             // if (!lns->fixInitialSolutionWithLNS2())
             //     last_failed = true;
-            lns->fixInitialSolutionWithLNS2()
+            lns->fixInitialSolutionWithLNS2();
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
