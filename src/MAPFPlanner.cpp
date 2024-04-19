@@ -129,7 +129,7 @@ void MAPFPlanner::plan(int time_limit)
         else 
         {
             //set one number for exp
-            lns->collision_clear_window = 50;
+            lns->collision_clear_window = MAX_TIMESTEP;
             lns->setRuntimeLimit(time_limit);
             plan_success.push_back(lns->fixInitialSolutionWithLNS2());
             lns->has_initial_solution = true;

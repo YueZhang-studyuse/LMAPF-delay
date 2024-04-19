@@ -81,6 +81,8 @@ public:
     Path findPath(const ConstraintTable& constraint_table);
 
 	Path findPath(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag,int w) {} //current we do not modify a* cause it is not used
+	Path findPathforSIPPS(const ConstraintTable& constraint_table, double timeout, bool &timeout_flag, int collision_free_window) {}
+	
 
 
 

@@ -142,6 +142,8 @@ bool InitLNS::run()
 
         }
 
+        //printPath();
+
         if (replan_algo_name == "PP" || neighbor.agents.size() == 1)
             succ = runPP();
         else
@@ -253,8 +255,11 @@ bool InitLNS::runPP()
         if (timeout_flag)
             break;
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
+        cout<<"num of collisions "<<agents[id].path_planner->num_collisions<<" path length "<<agents[id].path.size()<<endl;
         if (agents[id].path_planner->num_collisions > 0)
             updateCollidingPairs(neighbor.colliding_pairs, agents[id].id, agents[id].path);
+        // if (agents[id].path_planner->num_collisions < neighbor.colliding_pairs.size())
+        //     printPath();
         assert(agents[id].path_planner->num_collisions > 0 or
             !updateCollidingPairs(neighbor.colliding_pairs, agents[id].id, agents[id].path));
         neighbor.sum_of_costs += (int)agents[id].path.size() - 1;
@@ -269,7 +274,8 @@ bool InitLNS::runPP()
                  ", LL nodes = " << agents[id].path_planner->getNumExpanded() <<
                  ", remaining time = " << time_limit - runtime << " seconds. " << endl;
         }
-        if (neighbor.colliding_pairs.size() >= neighbor.old_colliding_pairs.size())
+        // if (neighbor.colliding_pairs.size() >= neighbor.old_colliding_pairs.size())
+        if (neighbor.colliding_pairs.size() > neighbor.old_colliding_pairs.size())
             break;
         path_table.insertPath(agents[id].id, agents[id].path);
         ++p;
@@ -379,6 +385,7 @@ bool InitLNS::updateCollidingPairs(set<pair<int, int>>& colliding_pairs, int age
             for (auto id : path_table.table[to][t])
             {
                 succ = true;
+                cout<<"v colliding "<<agent_id<<" "<<id<<endl;
                 colliding_pairs.emplace(min(agent_id, id), max(agent_id, id));
             }
         }
@@ -391,6 +398,7 @@ bool InitLNS::updateCollidingPairs(set<pair<int, int>>& colliding_pairs, int age
                     if (a1 == a2)
                     {
                         succ = true;
+                        cout<<"v colliding "<<agent_id<<" "<<a1<<endl;
                         colliding_pairs.emplace(min(agent_id, a1), max(agent_id, a1));
                         break;
                     }
@@ -828,7 +836,7 @@ void InitLNS::printPath() const
         cout << "Agent " << agent.id << ": ";//<< agent.path << endl;
         for (const auto& p: agent.path)
         {
-            cout<<p.location<<" ";
+            cout<<"("<<p.location/instance.env->cols<<","<<p.location%instance.env->cols<<")->";
         }
         cout<<endl;
     }

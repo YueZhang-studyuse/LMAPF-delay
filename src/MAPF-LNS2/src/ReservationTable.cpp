@@ -337,9 +337,6 @@ list<tuple<int, int, int, bool, bool>> ReservationTable::get_safe_intervals(int 
 
     for(auto interval : sit[to])
     {
-        // if (to == 627)
-        // cout<<"interval for location: "<<to<<endl;
-        // cout<<get<0>(interval)<<" "<<get<1>(interval)<<" "<<get<2>(interval)<<endl;
         if (lower_bound >= get<1>(interval))
             continue;
         else if (upper_bound <= get<0>(interval))
