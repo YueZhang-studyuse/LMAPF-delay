@@ -102,6 +102,7 @@ inline std::vector<int> read_int_vec(string fname, int team_size)
 
 inline std::vector<int> read_int_vec(string fname)
 {
+    cout<<"delay file "<<fname<<endl;
     std::vector<int> res;
 	string line;
 	std::ifstream myfile(fname.c_str());
