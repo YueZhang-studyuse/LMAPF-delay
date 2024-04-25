@@ -153,7 +153,7 @@ void MAPFPlanner::plan(int time_limit)
                 cum_success = 0;
                 cum_fail = 0;
             }
-            else if (current_window_factor < 1)
+            else
             {
                 //check if increase
                 if ((lns->iteration_stats.size()+lns->num_of_failures)*lns->get_neighbor_size() >= env->num_of_agents) //simply increase if we can run enough iterations
