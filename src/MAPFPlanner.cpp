@@ -111,6 +111,7 @@ void MAPFPlanner::plan(int time_limit)
 
         if (initial_run)
         {
+            lns->collision_clear_window = MAX_TIMESTEP;
             instance.prepareDummy();
             lns->clearAll("Adaptive");
             lns->setRuntimeLimit(1); //1s for initial run
@@ -129,9 +130,43 @@ void MAPFPlanner::plan(int time_limit)
         else 
         {
             //set one number for exp
-            lns->collision_clear_window = MAX_TIMESTEP;
+            //lns->collision_clear_window = MAX_TIMESTEP;
             lns->setRuntimeLimit(time_limit);
             plan_success.push_back(lns->fixInitialSolutionWithLNS2());
+            if (plan_success.back())
+                cum_success++;
+            else
+                cum_fail++;
+            //choose whether to decrease the window
+            if (rand()%(cum_fail+cum_success)+1 > cum_success) //decrease 
+            {
+                current_window_factor = current_window_factor*decay_factor;
+            }
+            else if (current_window_factor < 1)
+            {
+                //check if increase
+                if (lns->iteration_stats.size() >= env->num_of_agents) //simply increase if we can run enough iterations
+                {
+                    current_window_factor = current_window_factor*(1+increase_factor);
+                }
+            }
+            if (current_window_factor >= 1)
+            {
+                current_window_factor = 1;
+                lns->collision_clear_window = MAX_TIMESTEP;
+            }
+            else
+            {
+                if (lns->collision_clear_window == MAX_TIMESTEP)
+                {
+                    lns->collision_clear_window = (int) (((double)lns->sum_of_costs/env->num_of_agents)*current_window_factor);
+                }
+                else
+                {
+                    lns->collision_clear_window = (int) (lns->collision_clear_window*current_window_factor);
+                }
+            }
+
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();

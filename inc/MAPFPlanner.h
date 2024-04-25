@@ -42,8 +42,10 @@ public:
     //keep track of planning success/failure
     list<bool> plan_success;
 
-    double decay_factor = 0;
-    double increase_factor = 0;
+    double decay_factor = 0.5;
+    double increase_factor = 0.5;
     double current_window_factor = 1;
-    int check_window = 20; //how many we check for decide the collision-free window
+    //int check_window = 20; //how many we check for decide the collision-free window
+    int cum_success = 0;
+    int cum_fail = 0;
 };
