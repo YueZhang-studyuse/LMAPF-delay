@@ -53,6 +53,7 @@ public:
     virtual string getSolverName() const = 0;
 
     void set_neighbor_size(int n){neighbor_size = neighbor_size > 100? neighbor_size : int(neighbor_size * n);}
+    int get_neighbor_size(){return neighbor_size;}
 protected:
     // input params
     const Instance& instance; // avoid making copies of this variable as much as possible

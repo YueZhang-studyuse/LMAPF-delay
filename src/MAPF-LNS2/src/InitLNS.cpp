@@ -36,7 +36,7 @@ InitLNS::InitLNS(const Instance& instance, vector<Agent>& agents, double time_li
 
 bool InitLNS::run()
 {
-    screen = 3;
+    //screen = 3;
     start_time = Time::now();
     bool succ = getInitialSolution();
     runtime = ((fsec)(Time::now() - start_time)).count();
@@ -255,7 +255,7 @@ bool InitLNS::runPP()
         if (timeout_flag)
             break;
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
-        cout<<"num of collisions "<<agents[id].path_planner->num_collisions<<" path length "<<agents[id].path.size()<<endl;
+        //cout<<"num of collisions "<<agents[id].path_planner->num_collisions<<" path length "<<agents[id].path.size()<<endl;
         if (agents[id].path_planner->num_collisions > 0)
             updateCollidingPairs(neighbor.colliding_pairs, agents[id].id, agents[id].path);
         // if (agents[id].path_planner->num_collisions < neighbor.colliding_pairs.size())
@@ -385,7 +385,7 @@ bool InitLNS::updateCollidingPairs(set<pair<int, int>>& colliding_pairs, int age
             for (auto id : path_table.table[to][t])
             {
                 succ = true;
-                cout<<"v colliding "<<agent_id<<" "<<id<<endl;
+                //cout<<"v colliding "<<agent_id<<" "<<id<<endl;
                 colliding_pairs.emplace(min(agent_id, id), max(agent_id, id));
             }
         }
@@ -398,7 +398,7 @@ bool InitLNS::updateCollidingPairs(set<pair<int, int>>& colliding_pairs, int age
                     if (a1 == a2)
                     {
                         succ = true;
-                        cout<<"v colliding "<<agent_id<<" "<<a1<<endl;
+                        //cout<<"v colliding "<<agent_id<<" "<<a1<<endl;
                         colliding_pairs.emplace(min(agent_id, a1), max(agent_id, a1));
                         break;
                     }

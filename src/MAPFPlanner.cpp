@@ -129,34 +129,48 @@ void MAPFPlanner::plan(int time_limit)
         }
         else 
         {
+            cout<<"current planner widnow "<<lns->collision_clear_window<<endl;
             //set one number for exp
             //lns->collision_clear_window = MAX_TIMESTEP;
             lns->setRuntimeLimit(time_limit);
             plan_success.push_back(lns->fixInitialSolutionWithLNS2());
+            
+            lns->has_initial_solution = true;
+            lns->setIterations(MAX_TIMESTEP); 
+            lns->run();
+
             if (plan_success.back())
                 cum_success++;
             else
                 cum_fail++;
             //choose whether to decrease the window
-            if (rand()%(cum_fail+cum_success)+1 > cum_success) //decrease 
+            int ran_result = rand()%(cum_fail+cum_success)+1;
+            cout<<"random result "<<ran_result<<" cum succss "<<cum_success<<" cum fail "<<cum_fail<<" iterations "<<lns->iteration_stats.size()+lns->num_of_failures<<endl;
+            if (ran_result > cum_success) //decrease 
             {
-                current_window_factor = current_window_factor*decay_factor;
+                cout<<"decrease "<<endl;
+                current_window_factor = decay_factor;
+                cum_success = 0;
+                cum_fail = 0;
             }
             else if (current_window_factor < 1)
             {
                 //check if increase
-                if (lns->iteration_stats.size() >= env->num_of_agents) //simply increase if we can run enough iterations
+                if ((lns->iteration_stats.size()+lns->num_of_failures)*lns->get_neighbor_size() >= env->num_of_agents) //simply increase if we can run enough iterations
                 {
-                    current_window_factor = current_window_factor*(1+increase_factor);
+                    cout<<"increase "<<endl;
+                    current_window_factor = 1+increase_factor;
+                    cum_fail=0;
+                    cum_success=0;
                 }
             }
-            if (current_window_factor >= 1)
-            {
-                current_window_factor = 1;
-                lns->collision_clear_window = MAX_TIMESTEP;
-            }
-            else
-            {
+            // if (current_window_factor >= 1)
+            // {
+            //     current_window_factor = 1;
+            //     lns->collision_clear_window = MAX_TIMESTEP;
+            // }
+            // else
+            // {
                 if (lns->collision_clear_window == MAX_TIMESTEP)
                 {
                     lns->collision_clear_window = (int) (((double)lns->sum_of_costs/env->num_of_agents)*current_window_factor);
@@ -165,12 +179,11 @@ void MAPFPlanner::plan(int time_limit)
                 {
                     lns->collision_clear_window = (int) (lns->collision_clear_window*current_window_factor);
                 }
-            }
-
-            lns->has_initial_solution = true;
-            lns->setIterations(MAX_TIMESTEP); 
-            lns->run();
+            //}
+            if (lns->collision_clear_window < 10)
+                lns->collision_clear_window = 10;
         }
+
     }
 }
 void MAPFPlanner::planner_commit(vector<Path>& curr_commits)
