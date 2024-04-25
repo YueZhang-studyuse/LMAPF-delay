@@ -46,6 +46,8 @@ HNode::HNode(const Config& _C, const Instance& I, HNode* _parent, const uint _g,
         {
           priorities[i] = (float)i/N;
           reach_goal[i] = false; //do not reach goal at the start stage
+          if (I.getGuidanceDistance(i,C[i]->index,0) != -1)
+            priorities[i]++;
         }
         depth = 0;
     } 
@@ -80,6 +82,8 @@ HNode::HNode(const Config& _C, const Instance& I, HNode* _parent, const uint _g,
                 else //still not arrived
                 {
                     priorities[i] = parent->priorities[i] + 1;
+                    if (I.getGuidanceDistance(i,C[i]->index,0) != -1)
+                        priorities[i]++;
                 }
             }
         }
@@ -421,18 +425,26 @@ bool Planner::funcPIBT(LACAMAgent* ai)
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
               [&](Vertex* const v, Vertex* const u) 
               {
-                  // return D.get(i, v) + tie_breakers[v->id] <
-                  //       D.get(i, u) + tie_breakers[u->id];
-                  return instance.getAllpairDistance(goal_loc,v->index) + tie_breakers[v->id] <
-                          instance.getAllpairDistance(goal_loc,u->index) + tie_breakers[u->id];
+                int v_h;
+                int u_h;
+                v_h = instance.getGuidanceDistance(ai->id,v->index,ai->curr_timestep+1);
+                u_h = instance.getGuidanceDistance(ai->id,u->index,ai->curr_timestep+1);
+                if (v_h == -1)
+                    v_h = instance.getAllpairDistance(goal_loc,v->index);
+                if (u_h == -1)
+                    u_h = instance.getAllpairDistance(goal_loc,u->index);
+
+                return v_h + tie_breakers[v->id] <
+                        u_h + tie_breakers[u->id];
+
               });
 
-    swap_agent = swap_possible_and_required(ai);
+    // swap_agent = swap_possible_and_required(ai);
 
-    if (swap_agent != nullptr)
-    {
-      std::reverse(C_next[i].begin(), C_next[i].begin() + K + 1);
-    }
+    // if (swap_agent != nullptr)
+    // {
+    //   std::reverse(C_next[i].begin(), C_next[i].begin() + K + 1);
+    // }
     //cout<<"operations "<<K<<endl;
       
     // main operation

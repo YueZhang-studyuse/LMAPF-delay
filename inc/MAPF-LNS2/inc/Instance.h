@@ -19,7 +19,9 @@ public:
 	//save map degree - for assigning goals
 	vector<int> degrees = {0,0,0,0};
 
-	mutable vector<vector<int>> existing_path;
+	//mutable vector<vector<int>> existing_path;
+
+	mutable vector<vector<int>> guidance_path;
 
 	//for allpair heuristics
 	void computeAllPair();
@@ -77,6 +79,22 @@ public:
 	int getAllpairDistance(int loc1, int loc2) const
 	{
 		return heuristic[loc1][loc2];
+	}
+
+	int getGuidanceDistance(int agent, int loc, int t) const
+	{
+		// if (agent >= guidance_path.size())
+		// 	cout<<"id "<<agent<<" "<<guidance_path.size()<<endl;
+		if (guidance_path.empty() || guidance_path[agent].size() <= t)
+			return -1;
+		// if (agent >= guidance_path.size())
+		// 	cout<<"id "<<agent<<" "<<guidance_path.size()<<endl;
+		// if (guidance_path[agent][t] >= heuristic.size())
+		// 	cout<<"t "<<t<<" loc "<<guidance_path[agent][t]<<endl;
+		// if (loc >= heuristic.size())
+		// 	cout<<"loc "<<loc<<endl;
+		int h = getAllpairDistance(loc,guidance_path[agent][t]);
+		return h;
 	}
 
 	int getDegree(int loc) const

@@ -39,4 +39,6 @@ public:
     mapf_algo algo = mapf_algo::LACAMLNS2;
 
     int mapf_planner;
+
+    set<int> past_collision_agents;
 };

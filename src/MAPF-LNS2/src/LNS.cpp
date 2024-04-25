@@ -354,11 +354,11 @@ bool LNS::fixInitialSolution()
                 complete_agents.emplace_back(agent.id);
                 makespan = max(makespan, (int)agent.path.size() - 1);
             }
-            instance.existing_path[agent.id].resize(agent.path.size());
-            for (int i = 0; i < (int)agent.path.size(); i++)
-            {
-                instance.existing_path[agent.id][i] = agent.path[i].location;
-            }
+            // instance.guidance_path[agent.id].resize(agent.path.size());
+            // for (int i = 0; i < (int)agent.path.size(); i++)
+            // {
+            //     instance.existing_path[agent.id][i] = agent.path[i].location;
+            // }
         }
     }
     if (screen == 2)
@@ -388,6 +388,10 @@ void LNS::checkReplan()
     int makespan = 0;
 
     initial_collision = false;
+
+    instance.guidance_path.clear();
+
+    instance.guidance_path.resize(agents.size());
 
     for (auto& agent : agents) //also include delaied agent
     {
@@ -435,6 +439,11 @@ void LNS::checkReplan()
                 initial_sum_of_costs += (int)agent.path.size() - 1;
                 complete_agents.emplace_back(agent.id);
                 makespan = max(makespan, (int)agent.path.size() - 1);
+                instance.guidance_path[agent.id].resize(agent.path.size());
+                for (int i = 0; i < agent.path.size(); i++)
+                {
+                    instance.guidance_path[agent.id][i] = agent.path[i].location;
+                }
             }
         }
     }

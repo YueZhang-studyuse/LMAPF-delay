@@ -7,7 +7,7 @@
 void Instance::initMap(SharedEnvironment* simulate_env)
 {
     env = simulate_env;
-    existing_path.resize(env->num_of_agents);
+    //existing_path.resize(env->num_of_agents);
 }
 
 void Instance::prepareDummy()
