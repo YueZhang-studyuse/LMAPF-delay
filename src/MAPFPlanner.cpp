@@ -156,7 +156,7 @@ void MAPFPlanner::plan(int time_limit)
             else
             {
                 //check if increase
-                if ((lns->iteration_stats.size()+lns->num_of_failures)*lns->get_neighbor_size() >= env->num_of_agents) //simply increase if we can run enough iterations
+                if (lns->collision_clear_window < MAX_TIMESTEP && (lns->iteration_stats.size()+lns->num_of_failures)*lns->get_neighbor_size() >= env->num_of_agents) //simply increase if we can run enough iterations
                 {
                     cout<<"increase "<<endl;
                     current_window_factor = 1+increase_factor;
