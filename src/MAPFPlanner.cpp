@@ -163,6 +163,10 @@ void MAPFPlanner::plan(int time_limit)
                     cum_fail=0;
                     cum_success=0;
                 }
+                else
+                {
+                    return;
+                }
             }
             // if (current_window_factor >= 1)
             // {
