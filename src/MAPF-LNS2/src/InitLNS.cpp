@@ -81,8 +81,8 @@ bool InitLNS::run()
         switch (init_destroy_strategy)
         {
             case TARGET_BASED:
-                //succ = generateNeighborByTarget();
-                succ = generateNeighborRandomly();
+                succ = generateNeighborByTarget();
+                //succ = generateNeighborRandomly();
                 break;
             case COLLISION_BASED:
                 succ = generateNeighborByCollisionGraph();
@@ -570,7 +570,7 @@ bool InitLNS::generateNeighborByTarget()
 
 
 
-    agents[a].path_planner->findMinimumSetofColldingTargets(goal_table,A_target);// generate non-wait path and collect A_target
+    //agents[a].path_planner->findMinimumSetofColldingTargets(goal_table,A_target);// generate non-wait path and collect A_target
 
 
 

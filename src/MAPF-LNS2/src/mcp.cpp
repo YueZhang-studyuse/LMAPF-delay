@@ -3,6 +3,7 @@
 
 void MCP::simulate(vector<Path*>& paths)
 {
+    window_size-=1;
     vector<Path> path_copy; 
     path_copy.resize(paths.size());
     copy_agent_time = agent_time;
@@ -26,21 +27,11 @@ void MCP::simulate(vector<Path*>& paths)
         // cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
-        current_finished_agents.clear();
-
 
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
             moveAgent(path_copy, paths, p, t);
-        }
-
-        for (auto i: current_finished_agents)
-        {
-            int loc = path_copy[i].back().location;
-            copy_mcp[loc].front().erase(i);
-            if (copy_mcp[loc].front().empty())
-                copy_mcp[loc].pop_front();
         }
         // cout<<endl;
 
@@ -105,10 +96,26 @@ bool MCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::i
                 ++p;
                 return false;
             }
-            current_finished_agents.push_back(i);
-            //copy_mcp[loc].front().erase(i);
-            // if (copy_mcp[loc].front().empty())
-            //     copy_mcp[loc].pop_front();
+                        //current_finished_agents.push_back((int)i);
+            if (copy_mcp[loc].begin()->count(i) > 0)
+            {
+                copy_mcp[loc].front().erase(i);
+                if (copy_mcp[loc].front().empty())
+                    copy_mcp[loc].pop_front();
+            }
+            else if (std::next(copy_mcp[loc].begin())->count(i) > 0)
+            {
+                std::next(copy_mcp[loc].begin())->erase(i);
+                if (std::next(copy_mcp[loc].begin())->empty())
+                {
+                    copy_mcp[loc].erase(std::next(copy_mcp[loc].begin()));
+                }
+            }
+            else
+            {
+                cout<<"mcp error";
+
+            }
             // cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
             p = unfinished_agents.erase(p);
             // cout <<"["<< i <<",g],";
