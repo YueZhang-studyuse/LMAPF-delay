@@ -90,5 +90,7 @@ private:
     vector<int> delay_for;
     int window_size;
 
+    list<int> current_finished_agents;
+
     bool moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::iterator& p, int t);
 };

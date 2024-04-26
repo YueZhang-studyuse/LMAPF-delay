@@ -26,17 +26,27 @@ void MCP::simulate(vector<Path*>& paths)
         // cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
+        current_finished_agents.clear();
+
 
         std::vector<int> before = copy_agent_time;
         for (auto p = unfinished_agents.begin(); p != unfinished_agents.end();) {
             int i = *p;
             moveAgent(path_copy, paths, p, t);
         }
+
+        for (auto i: current_finished_agents)
+        {
+            int loc = path_copy[i].back().location;
+            copy_mcp[loc].front().erase(i);
+            if (copy_mcp[loc].front().empty())
+                copy_mcp[loc].pop_front();
+        }
         // cout<<endl;
 
         // cout<<"unfinished: "<< unfinished_agents.size() <<endl;
 
-        if (t > window_size) // no need to check if all agents stops in window, as collision not allowed.
+        if (t <= window_size) // no need to check if all agents stops in window, as collision not allowed.
             continue;
 
         bool no_move = true;
@@ -95,9 +105,10 @@ bool MCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::i
                 ++p;
                 return false;
             }
-            copy_mcp[loc].front().erase(i);
-            if (copy_mcp[loc].front().empty())
-                copy_mcp[loc].pop_front();
+            current_finished_agents.push_back(i);
+            //copy_mcp[loc].front().erase(i);
+            // if (copy_mcp[loc].front().empty())
+            //     copy_mcp[loc].pop_front();
             // cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
             p = unfinished_agents.erase(p);
             // cout <<"["<< i <<",g],";
