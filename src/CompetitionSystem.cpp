@@ -129,7 +129,9 @@ void BaseSystem::execution_simulate()
     }
     
     SimulateMCP postmcp(map.map.size(),1);
+    postmcp.window_size = curr_commits;
     vector<Path*> temp;
+    
     temp.resize(curr_commits.size());
     for (int a = 0; a < curr_commits.size(); a++)
     {

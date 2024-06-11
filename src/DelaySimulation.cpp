@@ -136,14 +136,16 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     // decisions.back().move_tox = loc/map_col;
     // decisions.back().move_toy = loc%map_col;
     // decisions.back().prior_order = *(copy_mcp[loc].begin()->begin());
+    // cout<<"- { type: checking, id: "<<i<<", x: "<<previous/map_col<<", y: "<<previous%map_col<<", move_tox: "<<loc/map_col<<", move_toy: "<<loc%map_col<<", piror order: "<<*(copy_mcp[loc].begin()->begin())<<"}"<<endl;
     //cout<<"curr "<<previous<<" to "<<loc<<endl;
     //check delay here
     if (loc != previous && delay[i]) 
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
-        cout<<"find delaied "<<i<<endl;
-        // decisions.push_back(Decision("delay", previous/map_col, previous%map_col, i,"red"));
+        //cout<<"find delaied "<<i<<endl;
+        //decisions.push_back(Decision("delay", previous/map_col, previous%map_col, i,"red"));
+        //cout<<"- { type: delay, id: "<<i<<", x: "<<previous/map_col<<", y: "<<previous%map_col<<"}"<<endl;
         return false;
     }
 
@@ -232,7 +234,8 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
         ++p;
         // //cout <<"["<< i <<",m],";
         // decisions.push_back(Decision ("cleared", previous/map_col, previous%map_col, i,"white"));
-        // decisions.push_back(Decision("finished", loc/map_col, loc%map_col, i,"grey"));
+        //decisions.push_back(Decision("finished", loc/map_col, loc%map_col, i,"grey"));
+        //cout<<"- { type: finished, id: "<<i<<", x: "<<loc/map_col<<", y: "<<loc%map_col<<"}"<<endl;
         return true;
     }
 
@@ -297,16 +300,20 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
-                cout<<"result delay "<<i<<endl;
+                //cout<<"result delay "<<i<<endl;
                 // Decision temp("delay", previous/map_col, previous%map_col, i,"red");
                 // decisions.push_back(temp);
+                // cout<<"- { type: delay, id: "<<i<<", x: "<<previous/map_col<<", y: "<<previous%map_col<<"}"<<endl;;
+                
                 return false;
             }
         }
         ++p;
         // cout <<"["<< i <<",rm],";
         // decisions.push_back(Decision ("cleared", previous/map_col, previous%map_col, i,"white"));
-        // decisions.push_back(Decision ("finished", loc/map_col, loc%map_col, i,"grey"));
+        //decisions.push_back(Decision ("finished", loc/map_col, loc%map_col, i,"grey"));
+        //cout<<"- { type: finished, id: "<<i<<", x: "<<loc/map_col<<", y: "<<loc%map_col<<"}"<<endl;
+        
 
         return true;
 
@@ -314,7 +321,8 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     
     paths_copy[i].push_back(paths_copy[i].back()); // stay still
     ++p; // next agent
-    // decisions.push_back(Decision ("delay", loc/map_col, loc%map_col, i,"red"));
+    //decisions.push_back(Decision ("delay", loc/map_col, loc%map_col, i,"red"));
+    //cout<<"- { type: delay, id: "<<i<<", x: "<<loc/map_col<<", y: "<<loc%map_col<<"}"<<endl;
     return false;
 }
 
