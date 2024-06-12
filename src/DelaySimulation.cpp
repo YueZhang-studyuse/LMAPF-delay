@@ -11,6 +11,7 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
     copy_agent_time = agent_time;
     copy_mcp = mcp;
     unfinished_agents.clear();
+    window_size--;
     for (int i = 0; i < paths.size(); i++)
     {
         if (paths[i]->size()==0){
@@ -24,6 +25,8 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
         
     }
     cout<<"Start "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
+
+    cout<<"window size "<<window_size<<" delay size "<<delays.size()<<" path length "<<paths[0]->size()<<endl;
 
     for (int t = 0; !unfinished_agents.empty(); t++) {
         cout<<"Similate t = "<<t<<endl;
@@ -143,7 +146,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
-        //cout<<"find delaied "<<i<<endl;
+        cout<<"find delaied "<<i<<endl;
         //decisions.push_back(Decision("delay", previous/map_col, previous%map_col, i,"red"));
         //cout<<"- { type: delay, id: "<<i<<", x: "<<previous/map_col<<", y: "<<previous%map_col<<"}"<<endl;
         return false;

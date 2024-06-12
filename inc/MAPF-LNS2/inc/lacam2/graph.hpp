@@ -39,12 +39,12 @@ struct ConfigHasher {
 };
 
 struct RConfigHasher {
-  uint operator()(const std::pair<Config, std::vector<bool> > &RC) const;
+  uint operator()(const std::pair<Config, std::vector<int> > &RC) const;
 };
 
 struct RCEqual
 {
-  bool operator()(const std::pair<Config, std::vector<bool> > &RC1, const std::pair<Config, std::vector<bool> > &RC2) const
+  bool operator()(const std::pair<Config, std::vector<int> > &RC1, const std::pair<Config, std::vector<int> > &RC2) const
   {
     if (!is_same_config(RC1.first, RC2.first))
       return false;
