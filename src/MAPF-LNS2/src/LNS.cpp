@@ -1323,12 +1323,17 @@ void LNS::setStartGoal()
 {
     auto starts = instance.env->curr_states;
     auto goals = instance.env->goal_locations;
-    auto dummy_goals = instance.getDummyGoals();
+    //auto dummy_goals = instance.getDummyGoals();
     for (auto& a: agents)
     {
         a.path_planner->start_location = starts[a.id].location;
         a.path_planner->goal_location = goals[a.id][0].first;
-        a.path_planner->dummy_goal = dummy_goals[a.id];
+        //a.path_planner->dummy_goal = dummy_goals[a.id];
+        a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
+        for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
+        {
+            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+        }
         cout<<"start "<< a.path_planner->start_location<<endl;
     }
 }
@@ -1346,7 +1351,11 @@ void LNS::clearAll(const string & destory_name)
         a.path.clear();
         a.path_planner->start_location = starts[a.id].location;
         a.path_planner->goal_location = goals[a.id][0].first;
-        a.path_planner->dummy_goal = dummy_goals[a.id];
+        a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
+        for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
+        {
+            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+        }
         a.path_planner->commit_window = commit;
     }
 

@@ -19,14 +19,14 @@ public:
 	AStarNode(int loc, int g_val, int h_val, LLNode* parent, int timestep, int num_of_conflicts, bool reached_goal) :
 		LLNode(loc, g_val, h_val, parent, timestep, num_of_conflicts,reached_goal) 
 	{
-		if (parent != nullptr && parent->reached_goal)
+		if (parent != nullptr && parent->goal_index > 0)
 		{
-			reached_goal = true;
+			//reached_goal = true;
 			reached_goal_at = parent->reached_goal_at;
 		}
 		else
 		{
-			if (reached_goal && !parent->reached_goal) //reached goal at current timestep
+			if (reached_goal && parent->goal_index == 0) //reached goal at current timestep
 				reached_goal_at = timestep;
 		}
 	}

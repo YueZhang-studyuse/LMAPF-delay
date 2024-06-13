@@ -141,7 +141,7 @@ Path SpaceTimeAStar::findPath(const ConstraintTable& constraint_table)
 			
             // generate (maybe temporary) node
             auto next = new AStarNode(next_location, next_g_val, next_h_val,
-                                      curr, next_timestep, num_conflicts, (next_location == goal_location) || curr->reached_goal);
+                                      curr, next_timestep, num_conflicts, curr->goal_index+(next_location == goal_location));
 			
 
             // if (next_location == goal_location && curr->location == goal_location)

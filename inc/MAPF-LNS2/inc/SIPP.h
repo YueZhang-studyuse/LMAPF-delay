@@ -21,7 +21,7 @@ public:
             high_expansion(high_expansion), collision_v(collision_v) 
 			{}
 	SIPPNode(int loc, int g_val, int h_val, SIPPNode* parent, int timestep, int high_generation, int high_expansion,
-	        bool collision_v, int num_of_conflicts, bool reached_goal) :
+	        bool collision_v, int num_of_conflicts, int reached_goal) :
             LLNode(loc, g_val, h_val, parent, timestep, num_of_conflicts, reached_goal), high_generation(high_generation),
             high_expansion(high_expansion), collision_v(collision_v)
 			{
@@ -77,7 +77,7 @@ public:
 				        n1->wait_at_goal == n2->wait_at_goal &&
 				        n1->is_goal == n2->is_goal &&
                          n1->high_generation == n2->high_generation//);
-						&& n1->reached_goal == n2->reached_goal);
+						&& n1->goal_index == n2->goal_index);
 						//  n1->reached_goal_at == n2->reached_goal_at);
                         //max(n1->timestep, n2->timestep) <
                         //min(get<1>(n1->interval), get<1>(n2->interval))); //overlapping time intervals
