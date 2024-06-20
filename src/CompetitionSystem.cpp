@@ -1,12 +1,12 @@
 #include <cmath>
 #include "CompetitionSystem.h"
 #include <boost/tokenizer.hpp>
-//#include "nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 #include <functional>
 #include <Logger.h>
 #include <DelaySimulation.h>
 
-//using json = nlohmann::ordered_json;
+using json = nlohmann::ordered_json;
 
 
 list<Task> BaseSystem::move(vector<Action>& actions)
