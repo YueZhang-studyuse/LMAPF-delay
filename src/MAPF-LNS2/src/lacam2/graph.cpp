@@ -171,7 +171,7 @@ std::ostream& operator<<(std::ostream& os, const Config& config)
   return os;
 }
 
-uint RConfigHasher::operator()(const std::pair<Config, std::vector<bool> > &RC) const
+uint RConfigHasher::operator()(const std::pair<Config, std::vector<int> > &RC) const
 {
   auto C = RC.first;
   uint hash = C.size();

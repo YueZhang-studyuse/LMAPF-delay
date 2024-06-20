@@ -192,7 +192,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
             updatePath(curr, path);
             break;
         }
-        else if ((curr->reached_goal || curr->location == goal_location) && // arrive at the goal location or reach goal before
+        else if ((curr->goal_index > 0 || curr->location == goal_location) && // arrive at the goal location or reach goal before
                 !curr->wait_at_goal && // not wait at the goal location
                 curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window)) // the agent can hold the this location afterward until window
         {
@@ -227,12 +227,31 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
                                       (int)next_v_collision + (int)next_e_collision;
                 auto next_h_val = max(get_heuristic(next_location,goal_location), (next_collisions > 0?
                     holding_time : curr->getFVal()) - next_timestep); // path max
-                if (curr->reached_goal)
+                
+                int num_goal_reached = curr->goal_index;
+                
+                if (curr->goal_index > 0)
+                {
                     next_h_val = 0; //go to any location is fine
+                    if (next_location == other_goal_locations[curr->goal_index-1])
+                        num_goal_reached++;
+                }
+                else if (next_location == goal_location)
+                    num_goal_reached++;
+                
+                //add heursitics for all other goals
+                for (int i = 0; i < other_goal_locations.size(); i++)
+                {
+                    if (curr->goal_index-1 >= i)
+                        continue;
+                    next_h_val+=get_heuristic(next_location,other_goal_locations[i]);
+                }
+
+                int goal_reached = curr->goal_index;
                 
                 // generate (maybe temporary) node
                 auto next = new SIPPNode(next_location, next_timestep, next_h_val, curr, next_timestep,
-                                         next_high_generation, next_high_expansion, next_v_collision, next_collisions, (next_location == goal_location));
+                                         next_high_generation, next_high_expansion, next_v_collision, next_collisions, num_goal_reached);
                 // try to retrieve it from the hash table
                 if (dominanceCheck(next))
                 {
@@ -254,15 +273,27 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
             auto next_timestep = get<0>(interval);
             //auto next_h_val = max(my_heuristic[curr->location], (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
             auto next_h_val = max(get_heuristic(curr->location,goal_location), (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
-            if (curr->reached_goal)
+            int num_goal_reached = curr->goal_index;
+                
+            if (curr->goal_index > 0)
+            {
                 next_h_val = 0; //go to any location is fine
+            }
+            
+            //add heursitics for all other goals
+            for (int i = 0; i < other_goal_locations.size(); i++)
+            {
+                if (curr->goal_index-1 >= i)
+                    continue;
+                next_h_val+=get_heuristic(curr->location,other_goal_locations[i]);
+            }
 
             auto next_collisions = curr->num_of_conflicts +
                     // (int)curr->collision_v * max(next_timestep - curr->timestep - 1, 0) +
 		    (int)get<2>(interval);
             auto next = new SIPPNode(curr->location, next_timestep, next_h_val, curr, next_timestep,
                                      get<1>(interval), get<1>(interval), get<2>(interval),
-                                     next_collisions, (curr->location == goal_location));
+                                     next_collisions, curr->goal_index);
             //next->wait_at_goal = (curr->location == goal_location);
             next->wait_at_goal = (curr->location == goal_location);
             if (dominanceCheck(next))
@@ -310,7 +341,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table)
             updatePath(curr, path);
             break;
         }
-        else if ((curr->reached_goal || curr->location == goal_location) && // arrive at the goal location or reach goal before
+        else if ((curr->goal_index > 0 || curr->location == goal_location) && // arrive at the goal location or reach goal before
                 !curr->wait_at_goal && // not wait at the goal location
                 curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window)) // the agent can hold the this location afterward until window
         {
@@ -343,14 +374,34 @@ Path SIPP::findPath(const ConstraintTable& constraint_table)
                 auto holding_time = 0;
                 auto next_collisions = curr->num_of_conflicts +
                                       (int)next_v_collision + (int)next_e_collision;
+
                 auto next_h_val = max(get_heuristic(next_location,goal_location), (next_collisions > 0?
                     holding_time : curr->getFVal()) - next_timestep); // path max
-                if (curr->reached_goal)
+                
+                int num_goal_reached = curr->goal_index;
+                
+                if (curr->goal_index > 0)
+                {
                     next_h_val = 0; //go to any location is fine
+                    if (next_location == other_goal_locations[curr->goal_index-1])
+                        num_goal_reached++;
+                }
+                else if (next_location == goal_location)
+                    num_goal_reached++;
+                
+                //add heursitics for all other goals
+                for (int i = 0; i < other_goal_locations.size(); i++)
+                {
+                    if (curr->goal_index-1 >= i)
+                        continue;
+                    next_h_val+=get_heuristic(next_location,other_goal_locations[i]);
+                }
+
+                int goal_reached = curr->goal_index;
                 
                 // generate (maybe temporary) node
                 auto next = new SIPPNode(next_location, next_timestep, next_h_val, curr, next_timestep,
-                                         next_high_generation, next_high_expansion, next_v_collision, next_collisions, (next_location == goal_location));
+                                         next_high_generation, next_high_expansion, next_v_collision, next_collisions, num_goal_reached);
                 // try to retrieve it from the hash table
                 if (dominanceCheck(next))
                 {
@@ -370,18 +421,28 @@ Path SIPP::findPath(const ConstraintTable& constraint_table)
                 get<0>(interval) + curr->h_val <= reservation_table.constraint_table.length_max)
         {
             auto next_timestep = get<0>(interval);
-            //auto next_h_val = max(my_heuristic[curr->location], (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
             auto next_h_val = max(get_heuristic(curr->location,goal_location), (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
-            if (curr->reached_goal)
+            int num_goal_reached = curr->goal_index;
+                
+            if (curr->goal_index > 0)
+            {
                 next_h_val = 0; //go to any location is fine
+            }
+            
+            //add heursitics for all other goals
+            for (int i = 0; i < other_goal_locations.size(); i++)
+            {
+                if (curr->goal_index-1 >= i)
+                    continue;
+                next_h_val+=get_heuristic(curr->location,other_goal_locations[i]);
+            }
 
             auto next_collisions = curr->num_of_conflicts +
                     // (int)curr->collision_v * max(next_timestep - curr->timestep - 1, 0) +
 		    (int)get<2>(interval);
             auto next = new SIPPNode(curr->location, next_timestep, next_h_val, curr, next_timestep,
                                      get<1>(interval), get<1>(interval), get<2>(interval),
-                                     next_collisions, (curr->location == goal_location));
-            //next->wait_at_goal = (curr->location == goal_location);
+                                     next_collisions, curr->goal_index);
             next->wait_at_goal = (curr->location == goal_location);
             if (dominanceCheck(next))
                 pushNodeToFocal(next);

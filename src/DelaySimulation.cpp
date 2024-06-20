@@ -6,6 +6,7 @@
 
 void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & delays)
 {
+    window_size--;
     vector<Path> path_copy; 
     path_copy.resize(paths.size());
     copy_agent_time = agent_time;

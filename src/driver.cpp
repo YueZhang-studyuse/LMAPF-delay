@@ -145,9 +145,10 @@ int main(int argc, char **argv)
 
     vector<vector<bool>> delays = read_int_delay(base_folder + read_param_json<std::string>(data, "delayFile"), team_size);
     system_ptr->set_delay(delays);
+    system_ptr->commit_window = planner->commit;
 
 
-    system_ptr->set_num_tasks_reveal(read_param_json<int>(data, "numTasksReveal", 1));
+    system_ptr->set_num_tasks_reveal(system_ptr->commit_window);
 
     signal(SIGINT, sigint_handler);
 

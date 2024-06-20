@@ -31,6 +31,8 @@ public:
 
     // std::list<Decision> decisions;
 
+    int window_size = 1;
+
     vector<int> to_go;
 
     SimulateMCP(int map_size, int window_size):map_size(map_size),window_size(window_size){};
@@ -115,7 +117,6 @@ private:
     vector<int> copy_agent_time;
     list<int> unfinished_agents;
     vector<int> delay_for;
-    int window_size = 1;
 
     bool moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::iterator& p, int t, const vector<bool> & delay);
 };
