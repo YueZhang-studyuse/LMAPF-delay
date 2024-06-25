@@ -59,7 +59,7 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
                 no_move = false;
                 break;
             }
-            if (delays[t][*p])
+            if (t < delays.size() && delays[t][*p])
             {
                 no_move = false;
                 break;
