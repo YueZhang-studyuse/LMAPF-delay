@@ -1332,7 +1332,7 @@ void LNS::setStartGoal()
         a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
         for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
         {
-            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+            a.path_planner->other_goal_locations[i-1] = instance.env->goal_locations[a.id][i].first;
         }
         cout<<"start "<< a.path_planner->start_location<<endl;
     }
@@ -1354,7 +1354,7 @@ void LNS::clearAll(const string & destory_name)
         a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
         for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
         {
-            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+            a.path_planner->other_goal_locations[i-1] = instance.env->goal_locations[a.id][i].first;
         }
         a.path_planner->commit_window = commit;
     }
