@@ -1,12 +1,12 @@
 #include <cmath>
 #include "CompetitionSystem.h"
 #include <boost/tokenizer.hpp>
-//#include "nlohmann/json.hpp"
+#include "nlohmann/json.hpp"
 #include <functional>
 #include <Logger.h>
 #include <DelaySimulation.h>
 
-//using json = nlohmann::ordered_json;
+using json = nlohmann::ordered_json;
 
 
 list<Task> BaseSystem::move(vector<Action>& actions)
@@ -163,6 +163,10 @@ void BaseSystem::execution_simulate()
     for (int a = 0; a < curr_commits.size(); a++)
     {
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
+        for (auto loc: planner->future_paths[a])
+        {
+            curr_commits[a].push_back(PathEntry(loc));
+        }
         temp[a] = &(curr_commits[a]);
     }
     postmcp.build(temp);
