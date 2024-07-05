@@ -163,8 +163,14 @@ void BaseSystem::execution_simulate()
     for (int a = 0; a < curr_commits.size(); a++)
     {
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
+        bool first = true;
         for (auto loc: planner->future_paths[a])
         {
+            if (first)
+            {
+                continue;
+                first = false;
+            }
             curr_commits[a].push_back(PathEntry(loc));
         }
         temp[a] = &(curr_commits[a]);
