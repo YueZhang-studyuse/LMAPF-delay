@@ -168,8 +168,8 @@ void BaseSystem::execution_simulate()
         {
             if (first)
             {
-                continue;
                 first = false;
+                continue;
             }
             curr_commits[a].push_back(PathEntry(loc));
         }
