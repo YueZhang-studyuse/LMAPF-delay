@@ -151,25 +151,6 @@ void BaseSystem::simulate(int simulation_time)
     int curr_plann_timelimit = plan_time_limit;
     int exceed_time = 0;
 
-    // cout << "----------------------------" << std::endl;
-    // cout << "Timestep " << timestep << std::endl;
-
-    // //add an initial planning here
-    // //plan
-    // sync_shared_env();
-
-    // planner->loadPaths(); //we assume time on loading path is free for analysis
-    // auto start = std::chrono::steady_clock::now();
-    // planner->plan(init_time_limit);
-    // auto end = std::chrono::steady_clock::now();
-    // auto diff = end-start; //actual planning time
-    // planner_times.push_back(std::chrono::duration<double>(diff).count());
-    // int exceed_time = int(planner_times.back()+0.9 - plan_time_limit); //we allow 0.1s exceed time
-
-    // //commit k
-    // planner->planner_commit(curr_commits); //push back the curr commits
-
-
     for (; timestep < simulation_time; ) //start execution
     {
         
@@ -207,12 +188,6 @@ void BaseSystem::simulate(int simulation_time)
 
         for (int agent = 0; agent < num_of_agents; agent++) //remove the current position
         {
-            // cout<<"agent path of "<<agent<<endl;
-            // for (auto p: curr_commits[agent])
-            // {
-            //     cout<<p.location<<" -> ";
-            // }
-            //cout<<endl;
             if (curr_commits[agent].size() - 1 > curr_plann_timelimit)
             {
                 curr_plann_timelimit = curr_commits[agent].size() - 1; //update plan time limit for window i+1
@@ -285,12 +260,6 @@ void BaseSystem::initialize()
     env->rows = map.rows;
     env->cols = map.cols;
     env->map = map.map;
-    // env->unexecuted_paths.resize(num_of_agents);
-    // for (int i = 0; i < num_of_agents; i++)
-    // {
-    //     env->unexecuted_paths[i].resize(1);
-    //     env->unexecuted_paths[i][0].location = starts[i].location;
-    // }
     finished_tasks.resize(num_of_agents);
     timestep = 0;
     curr_states = starts;
