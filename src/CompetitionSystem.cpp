@@ -207,12 +207,17 @@ void BaseSystem::simulate(int simulation_time)
     //upate moves that will not be execute with start location
     for (int i = 0; i < num_of_agents; i++)
     {
-        env->unexecuted_paths[i].clear();
-        // for (int t = commit_window-1; t < curr_commits[i].size(); t++)
-        // {
-        env->unexecuted_paths[i].push_back(curr_commits[i].back());
-        // }
-        // curr_commits[i].resize(commit_window);
+        // env->unexecuted_paths[i].clear();
+        // // for (int t = commit_window-1; t < curr_commits[i].size(); t++)
+        // // {
+        // env->unexecuted_paths[i].push_back(curr_commits[i].back());
+        // // }
+        // // curr_commits[i].resize(commit_window);
+
+        for (auto loc: planner->future_paths[a])
+        {
+            env->unexecuted_paths[i].push_back(PathEntry(loc));
+        }
     }
 
 
