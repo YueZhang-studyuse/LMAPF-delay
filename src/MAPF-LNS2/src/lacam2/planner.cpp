@@ -345,11 +345,11 @@ bool Planner::get_new_config(HNode* H, LNode* L)
 
         a->goal_index = H->reach_goal[a->id];
 
-        if (H->depth <= commit_window || a->goal_index == 0) //cannot reach goal before window
+        if (H->depth < commit_window || a->goal_index == 0) //cannot reach goal before window
         {
             occupied_now[a->v_now->id] = a;
         }
-        if (a->goal_index > 0 && H->depth > commit_window)
+        if (a->goal_index > 0 && H->depth >= commit_window)
         {
             a->v_next = a->v_now;
         }

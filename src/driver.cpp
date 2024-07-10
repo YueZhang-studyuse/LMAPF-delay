@@ -148,7 +148,7 @@ int main(int argc, char **argv)
     system_ptr->commit_window = planner->commit;
 
     //reveal more than 1 task (always enough task)
-    system_ptr->set_num_tasks_reveal(system_ptr->commit_window);
+    system_ptr->set_num_tasks_reveal(system_ptr->commit_window+1);
 
     signal(SIGINT, sigint_handler);
 
