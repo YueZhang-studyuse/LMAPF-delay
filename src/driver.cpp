@@ -50,7 +50,9 @@ int main(int argc, char **argv)
         ("preprocessTimeLimit", po::value<int>()->default_value(INT_MAX), "the time limit for preprocessing in seconds")
         ("logFile,l", po::value<std::string>(), "issue log file name")
         ("commitStep,c", po::value<int>()->default_value(1), "commit steps")
-        ("mapfPlanner", po::value<int>()->default_value(1), "commit steps");
+        ("mapfPlanner", po::value<int>()->default_value(1), "mapf Planner, 1-LACAM only 2-Replanall 3-Replanaffect")
+        ("delayPolicy", po::value<int>()->default_value(1), "delay execution plolcy, 1-MCP")
+        ("delaySimulateAll", po::value<bool>()->default_value(true), "whether load simulate all path with dummy simulation");
 
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -146,6 +148,9 @@ int main(int argc, char **argv)
     vector<vector<bool>> delays = read_int_delay(base_folder + read_param_json<std::string>(data, "delayFile"), team_size);
     system_ptr->set_delay(delays);
     system_ptr->commit_window = planner->commit;
+
+    system_ptr->delay_policy = vm["delayPolicy"].as<int>();
+    system_ptr->delay_simulate_all = vm["delaySimulateAll"].as<bool>();
 
 
     system_ptr->set_num_tasks_reveal(system_ptr->commit_window+1);

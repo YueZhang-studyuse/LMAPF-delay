@@ -17,6 +17,9 @@ public:
     int commit_window = 1;
     Logger* logger = nullptr;
 
+    int delay_policy = 1;
+    bool delay_simulate_all = true;
+
     vector<vector<bool>> simulation_delay;
 
 	BaseSystem(Grid &grid, MAPFPlanner* planner, ActionModel* model):

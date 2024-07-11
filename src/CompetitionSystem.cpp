@@ -156,19 +156,36 @@ void BaseSystem::execution_simulate()
         cout<<endl;
         cout<<"original delay count "<<dcount<<endl;
     }
-    
-    SimulateMCP postmcp(map.map.size(),1);
-    postmcp.window_size = commit_window;
+
     vector<Path*> temp;
     temp.resize(curr_commits.size());
     for (int a = 0; a < curr_commits.size(); a++)
     {
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
+        if (delay_simulate_all)
+        {
+            bool first = true;
+            for (auto loc: planner->future_paths[a])
+            {
+                if (first)
+                {
+                    first = false;
+                    continue;
+                }
+                curr_commits[a].push_back(PathEntry(loc));
+            }
+        }
         temp[a] = &(curr_commits[a]);
     }
-    postmcp.build(temp);
-    postmcp.simulate(temp,delay);
-    postmcp.clear();
+    
+    if (delay_policy == 1)
+    {
+        SimulateMCP postmcp(map.map.size(),1);
+        postmcp.window_size = commit_window;
+        postmcp.build(temp);
+        postmcp.simulate(temp,delay);
+        postmcp.clear();
+    }
 }
 
 void BaseSystem::simulate(int simulation_time)
@@ -271,7 +288,8 @@ void BaseSystem::simulate(int simulation_time)
                 else
                     actions[agent] = Action::N;
                 curr_commits[agent].erase(curr_commits[agent].begin());
-                cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
+                if (actions[agent] != Action::WA)
+                    cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
             }
             cout<<endl;
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
@@ -297,6 +315,19 @@ void BaseSystem::simulate(int simulation_time)
             for (int t = commit_window-1; t < curr_commits[i].size(); t++)
             {
                 env->unexecuted_paths[i].push_back(curr_commits[i][t]);
+            }
+            if (!delay_simulate_all)
+            {
+                bool first = true;
+                for (auto loc: planner->future_paths[i])
+                {
+                    if (first)
+                    {
+                        first = false;
+                        continue;
+                    }
+                    env->unexecuted_paths[i].push_back(PathEntry(loc));
+                }
             }
             curr_commits[i].resize(commit_window);
         }

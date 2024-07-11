@@ -1182,6 +1182,38 @@ bool LNS::loadPaths(vector<list<int>> paths)
     return true;
 }
 
+bool LNS::loadPaths(vector<Path> paths)
+{
+    for (int agent_id = 0; agent_id < instance.getDefaultNumberOfAgents(); agent_id++)
+    {
+        if (paths[agent_id].empty())
+            continue;
+        for(auto location: paths[agent_id])
+        {
+            agents[agent_id].path.emplace_back(location);
+        }
+        for (int i = paths[agent_id].size(); i <= commit; i++) //we ensure enough locations in commit window
+        {
+            agents[agent_id].path.emplace_back(paths[agent_id].back());
+        }
+        //path_table.insertPath(agent_id, agents[agent_id].path);
+        initial_sum_of_costs+=agents[agent_id].path.size()-1;
+        // if (agents[agent_id].path.front().location != agents[agent_id].path_planner->start_location)
+        // {
+        //     cerr << "Agent " << agent_id <<"'s path starts at " << agents[agent_id].path.front().location
+        //     << "=(" << instance.getColCoordinate(agents[agent_id].path.front().location)
+        //     << "," << instance.getRowCoordinate(agents[agent_id].path.front().location)
+        //     << "), which is different from its start location " << agents[agent_id].path_planner->start_location << endl
+        //     << "=(" << instance.getColCoordinate(agents[agent_id].path_planner->start_location)
+        //     << "," << instance.getRowCoordinate(agents[agent_id].path_planner->start_location)
+        //     << ")" << endl;
+        //     exit(-1);
+        // }
+    }
+    has_initial_solution = true;
+    return true;
+}
+
 void LNS::writePathsToFile(const string & file_name) const
 {
     std::ofstream output;
