@@ -1204,22 +1204,8 @@ void LNS::commitPath(int commit_step, vector<list<int>> &commit_path, vector<lis
 {
     for (const auto &agent : agents)
     {
-        // if (agent.path.empty())
-        //     cout<<"error "<<agent.id<<endl;
         if (screen == 3)
             cout<<"Commiting: "<<agent.id<<" current location "<<agent.path.front().location<<" gola location "<<instance.env->goal_locations[agent.id][0].first<<endl;
-        //agent reach target before, but need to de-tour due to resolving conflict, so we add the time reach target as waiting
-        // if (current_time != 0 && agent.path.size() > 1 && commit_path[agent.id].size() <= current_time)
-        // {
-        //     commit_path[agent.id].emplace_back(commit_path[agent.id].back());
-        //     if (screen == 3)
-        //         cout<< "(" << instance.getColCoordinate(commit_path[agent.id].back()) << "," <<
-        //                         instance.getRowCoordinate(commit_path[agent.id].back()) << ")->";
-        // }
-        // if (agent.path.size() == 1)
-        // {
-        //     cout<<"path empty"<<endl;
-        // }
         if (agent.path.size() > commit_step)
         {
             if (stay_target[agent.id] != 0)
@@ -1332,7 +1318,7 @@ void LNS::setStartGoal()
         a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
         for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
         {
-            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+            a.path_planner->other_goal_locations[i-1] = instance.env->goal_locations[a.id][i].first;
         }
         cout<<"start "<< a.path_planner->start_location<<endl;
     }
@@ -1354,7 +1340,7 @@ void LNS::clearAll(const string & destory_name)
         a.path_planner->other_goal_locations.resize(instance.env->goal_locations[a.id].size()-1);
         for (int i = 1; i < instance.env->goal_locations[a.id].size();i++)
         {
-            a.path_planner->other_goal_locations[i] = instance.env->goal_locations[a.id][i].first;
+            a.path_planner->other_goal_locations[i-1] = instance.env->goal_locations[a.id][i].first;
         }
         a.path_planner->commit_window = commit;
     }

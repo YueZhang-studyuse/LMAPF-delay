@@ -43,6 +43,13 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
     // generate start and add it to the OPEN & FOCAL list
     auto holding_time = 0;
     auto h = get_heuristic(start_location,goal_location);
+    for (int i = 0; i < other_goal_locations.size(); i++)
+    {
+        if (i == 0)
+            h+=get_heuristic(goal_location,other_goal_locations[i]);
+        else
+            h+=get_heuristic(other_goal_locations[i-1],other_goal_locations[i]);
+    }
 
     auto start = new SIPPNode(start_location, 0, h, nullptr, 0, get<1>(interval), get<1>(interval),
                                 get<2>(interval), get<2>(interval), (start_location == goal_location));
@@ -70,8 +77,9 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
             break;
         }
         else if ((curr->goal_index > 0 || curr->location == goal_location) && // arrive at the goal location or reach goal before
-                !curr->wait_at_goal && // not wait at the goal location
-                curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window)) // the agent can hold the this location afterward until window
+                //!curr->wait_at_goal && // not wait at the goal location
+                //curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window) //maybe not stay at current location for larger commit
+                curr->timestep >= commit_window) // the agent can hold the this location afterward until window
         {
             int future_collisions = 0; //disappear does not require to check future collisions
             if (future_collisions == 0) //agent can stay at goal location
@@ -93,17 +101,14 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
 
         for (int next_location : instance.getNeighbors(curr->location)) // move to neighboring locations
         {
-            for (auto & i : reservation_table.get_safe_intervals(
-                    curr->location, next_location, curr->timestep + 1, curr->high_expansion + 1))
+            for (auto & i : reservation_table.get_safe_intervals(curr->location, next_location, curr->timestep + 1, curr->high_expansion + 1))
             {
                 int next_high_generation, next_timestep, next_high_expansion;
                 bool next_v_collision, next_e_collision;
                 tie(next_high_generation, next_timestep, next_high_expansion, next_v_collision, next_e_collision) = i;
                 auto holding_time = 0;
-                auto next_collisions = curr->num_of_conflicts +
-                                      (int)next_v_collision + (int)next_e_collision;
-                auto next_h_val = max(get_heuristic(next_location,goal_location), (next_collisions > 0?
-                    holding_time : curr->getFVal()) - next_timestep); // path max
+                auto next_collisions = curr->num_of_conflicts + (int)next_v_collision + (int)next_e_collision;
+                auto next_h_val = max(get_heuristic(next_location,goal_location), (next_collisions > 0? holding_time : curr->getFVal()) - next_timestep); // path max
                 
                 int num_goal_reached = curr->goal_index;
                 
@@ -119,7 +124,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
                 //add heursitics for all other goals
                 for (int i = 0; i < other_goal_locations.size(); i++)
                 {
-                    if (curr->goal_index-1 >= i)
+                    if (curr->goal_index > i)
                         continue;
                     if (i == 0)
                         next_h_val+=get_heuristic(goal_location,other_goal_locations[i]);
