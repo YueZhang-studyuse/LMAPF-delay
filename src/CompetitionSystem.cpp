@@ -17,7 +17,8 @@ list<Task> BaseSystem::move(vector<Action>& actions)
     }
 
     list<Task> finished_tasks_this_timestep; // <agent_id, task_id, timestep>
-    curr_states = model->result_states(curr_states, actions);
+    if (model->is_valid(curr_states,model->result_states(curr_states, actions)))
+        curr_states = model->result_states(curr_states, actions);
 
     // agents do not move
     for (int k = 0; k < num_of_agents; k++)
@@ -86,7 +87,11 @@ void InfAssignSystem::sync_shared_env()
     //predict start
     for (int i = 0; i < num_of_agents; i++)
     {
-        env->curr_states[i].location = env->unexecuted_paths[i].front().location;
+        if (!curr_commits[i].empty())
+            env->curr_states[i].location = curr_commits[i].back().location;
+        else
+            env->curr_states[i].location = starts[i].location;
+
     }
 }
 
@@ -161,6 +166,7 @@ void BaseSystem::execution_simulate()
     temp.resize(curr_commits.size());
     for (int a = 0; a < curr_commits.size(); a++)
     {
+        //cout<<"path for "<<a<<": ";
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
         if (delay_simulate_all)
         {
@@ -175,8 +181,56 @@ void BaseSystem::execution_simulate()
                 curr_commits[a].push_back(PathEntry(loc));
             }
         }
+        // for (auto loc: curr_commits[a])
+        // {
+        //     cout<<loc.location<<"->";
+        // }
+        // cout<<endl;
         temp[a] = &(curr_commits[a]);
     }
+
+    // vector<Agent> commited_agents;
+    // int N = num_of_agents;
+    // commited_agents.reserve(N);
+    // for (int i = 0; i < N; i++)
+    //     commited_agents.emplace_back(planner->instance, i, false);
+    // for (int agent_id = 0; agent_id < num_of_agents; agent_id++)
+    // {
+    //     for(auto location: curr_commits[agent_id])
+    //     {
+    //         commited_agents[agent_id].path.emplace_back(location);
+    //     }
+    // }
+    // for (const auto& a1_ : commited_agents)
+    // {
+    //     for (int t = 1; t < (int) a1_.path.size(); t++ )
+    //     {
+    //         if (!planner->instance.validMove(a1_.path[t - 1].location, a1_.path[t].location))
+    //         {
+    //             cout<<"invalid move "<<a1_.id<<" "<<t<<" "<<a1_.path[t - 1].location<<" "<<a1_.path[t].location<<endl;
+    //         }
+    //     }
+    //     for (const auto  & a2_: commited_agents)
+    //     {
+    //         if (a1_.id >= a2_.id || a2_.path.empty())
+    //             continue;
+    //         const auto & a1 = a1_.path.size() <= a2_.path.size()? a1_ : a2_;
+    //         const auto & a2 = a1_.path.size() <= a2_.path.size()? a2_ : a1_;
+    //         int t = 1;
+    //         for (; t < (int) a1.path.size(); t++)
+    //         {
+    //             if (a1.path[t].location == a2.path[t].location) // vertex conflict
+    //             {
+    //                 cout<<"vertex conflict"<<a1.id<<" "<<a2.id<<endl;
+    //             }
+    //             else if (a1.path[t].location == a2.path[t - 1].location &&
+    //                     a1.path[t - 1].location == a2.path[t].location) // edge conflict
+    //             {
+    //                 cout<<"edge conflict "<<a1.id<<" "<<a2.id<<endl;
+    //             }
+    //         }
+    //     }
+    // }
     
     if (delay_policy == 1)
     {
@@ -186,6 +240,61 @@ void BaseSystem::execution_simulate()
         postmcp.simulate(temp,delay);
         postmcp.clear();
     }
+
+    // for (int a = 0; a < curr_commits.size(); a++)
+    // {
+    //     cout<<"path for "<<a<<": ";
+    //     for (auto loc: curr_commits[a])
+    //     {
+    //         cout<<loc.location<<"->";
+    //     }
+    //     cout<<endl;
+    // }
+
+    // vector<Agent> commited_agents;
+    // int N = num_of_agents;
+    // commited_agents.reserve(N);
+    // for (int i = 0; i < N; i++)
+    //     commited_agents.emplace_back(planner->instance, i, false);
+    // for (int agent_id = 0; agent_id < num_of_agents; agent_id++)
+    // {
+    //     for(auto location: curr_commits[agent_id])
+    //     {
+    //         commited_agents[agent_id].path.emplace_back(location);
+    //     }
+    // }
+    // int sum = 0;
+    // for (const auto& a1_ : commited_agents)
+    // {
+    //     for (int t = 1; t < (int) a1_.path.size(); t++ )
+    //     {
+    //         if (!planner->instance.validMove(a1_.path[t - 1].location, a1_.path[t].location))
+    //         {
+    //             cout<<"invalid move "<<a1_.id<<" "<<t<<" "<<a1_.path[t - 1].location<<" "<<a1_.path[t].location<<endl;
+    //         }
+    //     }
+    //     sum += (int) a1_.path.size() - 1;
+    //     for (const auto  & a2_: commited_agents)
+    //     {
+    //         if (a1_.id >= a2_.id || a2_.path.empty())
+    //             continue;
+    //         const auto & a1 = a1_.path.size() <= a2_.path.size()? a1_ : a2_;
+    //         const auto & a2 = a1_.path.size() <= a2_.path.size()? a2_ : a1_;
+    //         int t = 1;
+    //         for (; t < (int) a1.path.size(); t++)
+    //         {
+    //             if (a1.path[t].location == a2.path[t].location) // vertex conflict
+    //             {
+    //                 cout<<"vertex conflict"<<a1.id<<" "<<a2.id<<endl;
+    //             }
+    //             else if (a1.path[t].location == a2.path[t - 1].location &&
+    //                     a1.path[t - 1].location == a2.path[t].location) // edge conflict
+    //             {
+    //                 cout<<"edge conflict "<<a1.id<<" "<<a2.id<<endl;
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 void BaseSystem::simulate(int simulation_time)

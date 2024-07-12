@@ -2,6 +2,7 @@
 // #include "nlohmann/json.hpp"
 
 // using json = nlohmann::ordered_json;
+#include "BasicLNS.h"
 
 
 void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & delays)
@@ -280,7 +281,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
-                cout<<"result delay "<<i<<endl;
+                //cout<<"result delay "<<i<<endl;
                 return false;
             }
         }
@@ -331,13 +332,17 @@ void SimulateMCP::build(vector<Path*>& paths)
 
             if (t < paths[i]->size())
             {
+                // cout<<i<<" "<<paths[i]<<" "<<t<<" "<<paths[i]->at(t).location<<endl;
+                if (t_occupy_mcp.find(paths[i]->at(t).location) != t_occupy_mcp.end())
+                    cout<<"errors "<<i<<" "<<paths[i]<<" "<<t<<" "<<paths[i]->at(t).location<<endl;
                 t_occupy_mcp[paths[i]->at(t).location].insert(i);
                 no_wait_time[i].push_back(t);
             }
             
         }
 
-        for(auto& o : t_occupy_mcp){
+        for(auto& o : t_occupy_mcp)
+        {
             mcp[o.first].push_back(o.second);
         }
     }
