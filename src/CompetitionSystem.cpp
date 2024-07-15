@@ -5,6 +5,7 @@
 #include <functional>
 #include <Logger.h>
 #include <DelaySimulation.h>
+#include <PIBTDelaySimulation.h>
 
 using json = nlohmann::ordered_json;
 
@@ -150,11 +151,12 @@ void BaseSystem::execution_simulate()
     for (int t = 0; t < commit_window; t++)
     {
         delay[t].resize(num_of_agents);
-        cout<<"delay of time "<<t<<": ";
+        cout<<"delay agents at time "<<t<<": ";
         for (int i = 0; i < num_of_agents; i++)
         {
             delay[t][i] = simulation_delay[i][current_time+t];
-            cout<<delay[t][i]<<" ";
+            if (delay[t][i])
+                cout<<i<<" ";
             if (delay[t][i])
                 dcount++;
         }
@@ -166,7 +168,7 @@ void BaseSystem::execution_simulate()
     temp.resize(curr_commits.size());
     for (int a = 0; a < curr_commits.size(); a++)
     {
-        //cout<<"path for "<<a<<": ";
+        cout<<"path for "<<a<<": ";
         curr_commits[a].insert(curr_commits[a].begin(),PathEntry(curr_states[a].location)); //add start location
         if (delay_simulate_all)
         {
@@ -181,11 +183,11 @@ void BaseSystem::execution_simulate()
                 curr_commits[a].push_back(PathEntry(loc));
             }
         }
-        // for (auto loc: curr_commits[a])
-        // {
-        //     cout<<loc.location<<"->";
-        // }
-        // cout<<endl;
+        for (auto loc: curr_commits[a])
+        {
+            cout<<loc.location<<"->";
+        }
+        cout<<endl;
         temp[a] = &(curr_commits[a]);
     }
 
@@ -239,6 +241,25 @@ void BaseSystem::execution_simulate()
         postmcp.build(temp);
         postmcp.simulate(temp,delay);
         postmcp.clear();
+    }
+    else if (delay_policy == 2)
+    {
+        SimulatePIBT postpibt(commit_window,planner->instance);
+        postpibt.init(curr_commits);
+        postpibt.simulate(delay);
+        //update curr_commit and unexecuted path
+        for (int a = 0; a < curr_commits.size(); a++)
+        {
+            curr_commits[a].clear();
+            curr_commits[a].resize(postpibt.simulated_path[a].size());
+            int index = 0;
+            for (auto loc: postpibt.simulated_path[a])
+            {
+                curr_commits[a][index].location = loc;
+                index++;
+            }
+        }
+        postpibt.clear();
     }
 
     // for (int a = 0; a < curr_commits.size(); a++)

@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         ("logFile,l", po::value<std::string>(), "issue log file name")
         ("commitStep,c", po::value<int>()->default_value(1), "commit steps")
         ("mapfPlanner", po::value<int>()->default_value(1), "mapf Planner, 1-LACAM only 2-Replanall 3-Replanaffect")
-        ("delayPolicy", po::value<int>()->default_value(1), "delay execution plolcy, 1-MCP")
+        ("delayPolicy", po::value<int>()->default_value(1), "delay execution plolcy, 1-MCP, 2-Casual PIBT")
         ("delaySimulateAll", po::value<bool>()->default_value(true), "whether load simulate all path with dummy simulation");
 
     clock_t start_time = clock();
