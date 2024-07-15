@@ -109,12 +109,29 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                 ++p;
                 return false;
             }
-            copy_mcp[loc].front().erase(i);
-            if (copy_mcp[loc].front().empty())
-                copy_mcp[loc].pop_front();
-            //cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
+                        //current_finished_agents.push_back((int)i);
+            if (copy_mcp[loc].begin()->count(i) > 0)
+            {
+                copy_mcp[loc].front().erase(i);
+                if (copy_mcp[loc].front().empty())
+                    copy_mcp[loc].pop_front();
+            }
+            else if (std::next(copy_mcp[loc].begin())->count(i) > 0)
+            {
+                std::next(copy_mcp[loc].begin())->erase(i);
+                if (std::next(copy_mcp[loc].begin())->empty())
+                {
+                    copy_mcp[loc].erase(std::next(copy_mcp[loc].begin()));
+                }
+            }
+            else
+            {
+                cout<<"mcp error";
+
+            }
+            // cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
             p = unfinished_agents.erase(p);
-            //cout <<"["<< i <<",g],";
+            // cout <<"["<< i <<",g],";
             return true;
         }
         else 
