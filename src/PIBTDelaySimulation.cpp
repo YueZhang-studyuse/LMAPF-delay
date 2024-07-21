@@ -113,15 +113,15 @@ void SimulatePIBT::simulate(const vector<vector<bool>> & delays)
             }
         }
     }
-    for (int a = 0; a < agents.size(); a++)
-    {
-        cout<<"agent a "<<a<<" path: ";
-        for (auto p: simulated_path[a])
-        {
-            cout<<p<<" ";
-        }
-        cout<<endl;
-    }
+    // for (int a = 0; a < agents.size(); a++)
+    // {
+    //     cout<<"agent a "<<a<<" path: ";
+    //     for (auto p: simulated_path[a])
+    //     {
+    //         cout<<p<<" ";
+    //     }
+    //     cout<<endl;
+    // }
 
     cout<<"Simulation done at "<<(float)clock()/(float)CLOCKS_PER_SEC << endl;
     return;
@@ -134,7 +134,6 @@ bool SimulatePIBT::funcPIBT(Agent* ai) //return move or not
     //     cout<<"pibt for "<<ai->id<<" curr "<<ai->v_now<<endl;
     int from = ai->v_now;
     auto next = instance.getNeighbors(from);
-    next.push_back(ai->v_now);
     vector<pair<int,int>> next_with_time; //loc, time on the time independent path
 
     //sort based on sic
