@@ -198,7 +198,7 @@ bool InitLNS::run()
         cout<<"MCP Window Fix"<<endl;
         postProcessMCP();
         cout<<"MCP done"<<endl;
-        // printPath();
+        //printPath();
         
     }
     return (num_of_colliding_pairs == 0);
@@ -822,7 +822,15 @@ unordered_map<int, set<int>>& InitLNS::findConnectedComponent(const vector<set<i
 void InitLNS::printPath() const
 {
     for (const auto& agent : agents)
+    {
         cout << "Agent " << agent.id<<endl; //<< ": " << agent.path << endl;
+        for (auto loc: agent.path)
+        {
+            cout<<loc.location<<"->";
+        }
+        cout<<endl;
+    }
+
 }
 
 void InitLNS::printResult()

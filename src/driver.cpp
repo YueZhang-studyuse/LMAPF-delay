@@ -50,7 +50,11 @@ int main(int argc, char **argv)
         ("preprocessTimeLimit", po::value<int>()->default_value(INT_MAX), "the time limit for preprocessing in seconds")
         ("logFile,l", po::value<std::string>(), "issue log file name")
         ("commitStep,c", po::value<int>()->default_value(1), "commit steps")
-        ("mapfPlanner", po::value<int>()->default_value(1), "commit steps");
+        ("mapfPlanner", po::value<int>()->default_value(1), "mapf Planner, 1-LACAM only 2-Replanall 3-Replanaffect")
+        ("delayPolicy", po::value<int>()->default_value(1), "delay execution plolcy, 1-MCP, 2-Casual PIBT, 3-Time Dependent PIBT")
+        ("delaySimulateAll", po::value<bool>()->default_value(true), "whether load simulate all path with dummy simulation");
+    //test
+    //./lifelong --inputFile ../lifelong_benchmark/random/agent-300_scen-delay-0.005-1.json --simulationTime 10 -c 3 --mapfPlanner 3 --delayPolicy 3  --delaySimulateAll false -l log.txt -o test_3_pibtd.json --planTimeLimit 3  >test_3_pibtd.txt
 
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -145,9 +149,13 @@ int main(int argc, char **argv)
 
     vector<vector<bool>> delays = read_int_delay(base_folder + read_param_json<std::string>(data, "delayFile"), team_size);
     system_ptr->set_delay(delays);
+    system_ptr->commit_window = planner->commit;
+
+    system_ptr->delay_policy = vm["delayPolicy"].as<int>();
+    system_ptr->delay_simulate_all = vm["delaySimulateAll"].as<bool>();
 
 
-    system_ptr->set_num_tasks_reveal(read_param_json<int>(data, "numTasksReveal", 1));
+    system_ptr->set_num_tasks_reveal(system_ptr->commit_window+1);
 
     signal(SIGINT, sigint_handler);
 

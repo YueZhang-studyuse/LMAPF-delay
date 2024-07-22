@@ -15,7 +15,8 @@ public:
 	bool wait_at_goal = false; // the action is to wait at the goal vertex or not. This is used for >lenghth constraints
     bool is_goal = false;
 
-	bool reached_goal = false; //for reach true goal location
+	//bool reached_goal = false; //for reach true goal location
+	int goal_index = 0;
 	int reached_goal_at = MAX_TIMESTEP;
 
 	// // the following is used to comapre nodes in the OPEN list
@@ -103,18 +104,18 @@ public:
 
 
 	LLNode() {}
-	LLNode(int location, int g_val, int h_val, LLNode* parent, int timestep, int num_of_conflicts, bool reached_goal) :
+	LLNode(int location, int g_val, int h_val, LLNode* parent, int timestep, int num_of_conflicts, int goal_index) :
 		location(location), g_val(g_val), h_val(h_val), parent(parent), timestep(timestep),
-		num_of_conflicts(num_of_conflicts), reached_goal(reached_goal)
+		num_of_conflicts(num_of_conflicts), goal_index(goal_index)
 		{
-			if (parent != nullptr && parent->reached_goal)
+			if (parent != nullptr && parent->goal_index > 0)
 			{
-				this->reached_goal = true;
+				//this->reached_goal = true;
 				this->reached_goal_at = parent->reached_goal_at;
 			}
 			else if (parent != nullptr)
 			{
-				if (this->reached_goal && !parent->reached_goal) //reached goal at current timestep
+				if (this->goal_index > 0 && parent->goal_index == 0) //reached goal at current timestep
 					this->reached_goal_at = timestep;
 			}
 		}
@@ -151,7 +152,8 @@ public:
 
 	int start_location;
 	int goal_location;
-	int dummy_goal; //for dummy goal location
+	//int dummy_goal; //for dummy goal location
+	vector<int> other_goal_locations;
 
 	int commit_window = 1;
 

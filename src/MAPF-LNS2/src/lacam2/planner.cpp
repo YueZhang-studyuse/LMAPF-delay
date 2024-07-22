@@ -45,7 +45,7 @@ HNode::HNode(const Config& _C, const Instance& I, HNode* _parent, const uint _g,
         for (uint i = 0; i < N; ++i)
         {
           priorities[i] = (float)i/N;
-          reach_goal[i] = false; //do not reach goal at the start stage
+          reach_goal[i] = 0; //do not reach goal at the start stage
         }
         depth = 0;
     } 
@@ -56,24 +56,24 @@ HNode::HNode(const Config& _C, const Instance& I, HNode* _parent, const uint _g,
         // dynamic priorities, akin to PIBT
         for (size_t i = 0; i < N; ++i) 
         { 
-            if (parent->reach_goal[i]) //reached goal before
+            if (parent->reach_goal[i] > 0) //reached goal before
             {
-                reach_goal[i] = true;
+                reach_goal[i] = parent->reach_goal[i];
                 num_agent_reached++;
-                //priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
-                //parent reached goal before, so the current goal is dummy goal
-                auto dummy_goal = I.getDummyGoals()[i];
-                if (I.getAllpairDistance(dummy_goal, C[i]->index) == 0) //also reached dummy goal
-                {
+                //get current goal
+                auto curr_goal = I.env->goal_locations[i][reach_goal[i]].first;
+                // if (I.getAllpairDistance(dummy_goal, C[i]->index) == 0) //also reached dummy goal
+                // {
+                if (I.getAllpairDistance(curr_goal,C[i]->index) == 0)
                     priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
-                }
+                //}
             }
             else
             {
                 auto goal_index = I.env->goal_locations[i][0].first; //current we only consider plan for the first goal
                 if (I.getAllpairDistance(goal_index, C[i]->index) == 0) //current timestep arrive the real goal
                 {
-                    reach_goal[i] = true;
+                    reach_goal[i]++;
                     num_agent_reached++;
                     priorities[i] = parent->priorities[i] - (int)parent->priorities[i];
                 }
@@ -132,7 +132,7 @@ Solution Planner::solve(std::string& additional_info)
     // setup search
     auto OPEN = std::stack<HNode*>();
     //auto EXPLORED = std::unordered_map<Config, HNode*, ConfigHasher>();
-    auto EXPLORED = std::unordered_map<pair<Config,vector<bool>>, HNode*, RConfigHasher, RCEqual>();
+    auto EXPLORED = std::unordered_map<pair<Config,vector<int>>, HNode*, RConfigHasher, RCEqual>();
     // insert initial node, 'H': high-level node
     auto H_init = new HNode(ins->starts, instance, nullptr, 0, get_h_value(ins->starts));
     OPEN.push(H_init);
@@ -149,9 +149,6 @@ Solution Planner::solve(std::string& additional_info)
     {
         // do not pop here!
         auto H = OPEN.top();  // high-level node
-
-
-
         // low-level search end search tree refers to constraint tree
         if (H->search_tree.empty()) 
         {
@@ -200,24 +197,20 @@ Solution Planner::solve(std::string& additional_info)
         {
             continue;
         }
-        // else
-        // {
-        //     cout<<"get new config succeed"<<endl;
-        // }
 
 
-        vector<bool> reached;
-        reached.resize(A.size());
+        vector<int> num_reached;
+        num_reached.resize(A.size());
         // create new configuration
         for (auto a : A) 
         {
           C_new[a->id] = a->v_next;
-          reached[a->id] = a->reached_goal;
+          num_reached[a->id] = a->goal_index;
         }
 
         // check explored list
         //const auto iter = EXPLORED.find(C_new);
-        const auto iter = EXPLORED.find(make_pair(C_new,reached));
+        const auto iter = EXPLORED.find(make_pair(C_new,num_reached));
         if (iter != EXPLORED.end()) 
         {
             // case found
@@ -343,20 +336,20 @@ bool Planner::get_new_config(HNode* H, LNode* L)
             a->v_next = nullptr;
         }
         //clear previous reached goal flag
-        a->reached_goal = false;
+        a->goal_index = 0;
         a->curr_timestep = 0;
 
         // set occupied now
         a->v_now = H->C[a->id];
         a->curr_timestep = H->curr_time;
 
-        if (H->reach_goal[a->id]) a->reached_goal = true;
+        a->goal_index = H->reach_goal[a->id];
 
-        if (H->depth <= commit_window || !a->reached_goal) //cannot reach goal before window
+        if (H->depth < commit_window || a->goal_index == 0) //cannot reach goal before window
         {
             occupied_now[a->v_now->id] = a;
         }
-        if (a->reached_goal && H->depth > commit_window)
+        if (a->goal_index > 0 && H->depth >= commit_window)
         {
             a->v_next = a->v_now;
         }
@@ -390,7 +383,6 @@ bool Planner::get_new_config(HNode* H, LNode* L)
         auto a = A[k];
         if (a->v_next == nullptr && !funcPIBT(a))
         {
-            //cout<<"failure "<<a->id<<endl;
             return false;  // planning failure
         }
     }
@@ -416,7 +408,8 @@ bool Planner::funcPIBT(LACAMAgent* ai)
     LACAMAgent* swap_agent = nullptr;
 
 
-    int goal_loc = ai->reached_goal ? instance.getDummyGoals()[i] : instance.env->goal_locations[i][0].first;
+    int goal_loc =instance.env->goal_locations[i][ai->goal_index].first;
+    // ai->reached_goal ? instance.getDummyGoals()[i] : instance.env->goal_locations[i][0].first;
     //sort
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
               [&](Vertex* const v, Vertex* const u) 
@@ -513,8 +506,10 @@ bool Planner::is_swap_required(const uint pusher, const uint puller,
                                Vertex* v_pusher_origin, Vertex* v_puller_origin)
 {
 
-    auto pusher_goal = A[pusher]->reached_goal ? instance.getDummyGoals()[pusher] : instance.env->goal_locations[pusher][0].first;
-    auto puller_goal = A[puller]->reached_goal ? instance.getDummyGoals()[puller] : instance.env->goal_locations[puller][0].first;
+    auto pusher_goal = instance.env->goal_locations[pusher][A[pusher]->goal_index].first;
+    //A[pusher]->reached_goal ? instance.getDummyGoals()[pusher] : instance.env->goal_locations[pusher][0].first;
+    auto puller_goal = instance.env->goal_locations[pusher][A[puller]->goal_index].first;
+    //A[puller]->reached_goal ? instance.getDummyGoals()[puller] : instance.env->goal_locations[puller][0].first;
     if (pusher_goal == puller_goal)
     {
         return false; //no need to swap with same goal

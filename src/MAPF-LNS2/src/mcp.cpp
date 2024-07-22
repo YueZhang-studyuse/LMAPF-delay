@@ -3,6 +3,7 @@
 
 void MCP::simulate(vector<Path*>& paths)
 {
+    window_size-=1;
     vector<Path> path_copy; 
     path_copy.resize(paths.size());
     copy_agent_time = agent_time;
@@ -36,7 +37,7 @@ void MCP::simulate(vector<Path*>& paths)
 
         // cout<<"unfinished: "<< unfinished_agents.size() <<endl;
 
-        if (t > window_size) // no need to check if all agents stops in window, as collision not allowed.
+        if (t <= window_size) // no need to check if all agents stops in window, as collision not allowed.
             continue;
 
         bool no_move = true;
@@ -95,9 +96,26 @@ bool MCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list<int>::i
                 ++p;
                 return false;
             }
-            copy_mcp[loc].front().erase(i);
-            if (copy_mcp[loc].front().empty())
-                copy_mcp[loc].pop_front();
+                        //current_finished_agents.push_back((int)i);
+            if (copy_mcp[loc].begin()->count(i) > 0)
+            {
+                copy_mcp[loc].front().erase(i);
+                if (copy_mcp[loc].front().empty())
+                    copy_mcp[loc].pop_front();
+            }
+            else if (std::next(copy_mcp[loc].begin())->count(i) > 0)
+            {
+                std::next(copy_mcp[loc].begin())->erase(i);
+                if (std::next(copy_mcp[loc].begin())->empty())
+                {
+                    copy_mcp[loc].erase(std::next(copy_mcp[loc].begin()));
+                }
+            }
+            else
+            {
+                cout<<"mcp error";
+
+            }
             // cout<<"Agent "<<i<<" finished at "<<t << "at" << loc <<endl;
             p = unfinished_agents.erase(p);
             // cout <<"["<< i <<",g],";

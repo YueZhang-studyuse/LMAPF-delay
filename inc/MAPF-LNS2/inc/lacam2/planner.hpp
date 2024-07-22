@@ -19,7 +19,7 @@ struct LACAMAgent {
   const uint id;
   Vertex* v_now;   // current location
   Vertex* v_next;  // next location
-  bool reached_goal = false; //for reach goal disappear
+  int goal_index = 0; //for reach goal disappear
   int curr_timestep = 0;
   LACAMAgent(uint _id) : id(_id), v_now(nullptr), v_next(nullptr) {}
 };
@@ -50,10 +50,10 @@ struct HNode {
 
   int curr_time = 0;
 
-  //reached goal once
-  std::vector<bool> reach_goal;
-  //std::vector<int> goal_label; //each agent reached which goal
-  //std::vector<int> reached_goal_count; // how many agents reached the nth goal
+  //reached goal count
+  //std::vector<bool> reach_goal;
+  std::vector<int> reach_goal;
+
   int num_agent_reached = 0;
 
   // for low-level search
