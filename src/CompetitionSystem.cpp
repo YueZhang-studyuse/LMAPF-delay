@@ -401,6 +401,7 @@ void BaseSystem::simulate(int simulation_time)
         // execution with real delays w(i-1) and simulate future moves of w(i)
         execution_simulate(); 
         // add additional waiting from plan exceed time
+        exceed_time = int(planner_times.back()+0.9 - plan_time_limit); //we allow 0.1s exceed time
         for (int i = 0; i < exceed_time; i++)
         {
             timestep++;
