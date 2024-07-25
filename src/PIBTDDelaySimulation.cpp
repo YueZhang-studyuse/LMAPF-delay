@@ -124,8 +124,8 @@ void SimulatePIBTD::simulate(const vector<vector<bool>> & delays)
 
 bool SimulatePIBTD::funcPIBT(Agent* ai, bool first) //return move or not
 {
-    if (ai->id <= 5)
-        cout<<"pibt for "<<ai->id<<" curr "<<ai->v_now<<endl;
+    // if (ai->id <= 5)
+    //     cout<<"pibt for "<<ai->id<<" curr "<<ai->v_now<<endl;
     int from = ai->v_now;
     auto neighbor = instance.getNeighbors(from);
     vector<int> next;
