@@ -329,7 +329,8 @@ bool InitLNS::getInitialSolution()
     
     for (auto id : neighbor.agents)
     {
-        agents[id].path = agents[id].path_planner->findPath(constraint_table);
+        bool timeout = false;
+        agents[id].path = agents[id].path_planner->findPath(constraint_table,time_limit,timeout);
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
         if (agents[id].path_planner->num_collisions > 0)
             updateCollidingPairs(colliding_pairs, agents[id].id, agents[id].path);

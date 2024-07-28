@@ -118,6 +118,10 @@ public:
 				if (this->goal_index > 0 && parent->goal_index == 0) //reached goal at current timestep
 					this->reached_goal_at = timestep;
 			}
+			else if (this->goal_index > 0)
+			{
+				this->reached_goal_at = timestep;
+			}
 		}
 	LLNode(const LLNode& other) { copy(other); }
     ~LLNode()= default;
