@@ -11,9 +11,9 @@ void PathTable::insertPath(int agent_id, const Path& path)
         // assert(table[path[t].location][t] == NO_AGENT);
         table[path[t].location][t] = agent_id;
     }
-    assert(goals[path.back().location] == MAX_TIMESTEP);
-    goals[path.back().location] = (int) path.size() - 1;
-    makespan = max(makespan, (int) path.size() - 1);
+    // assert(goals[path.back().location] == MAX_TIMESTEP);
+    // goals[path.back().location] = (int) path.size() - 1;
+    // makespan = max(makespan, (int) path.size() - 1);
 }
 
 void PathTable::deletePath(int agent_id, const Path& path)

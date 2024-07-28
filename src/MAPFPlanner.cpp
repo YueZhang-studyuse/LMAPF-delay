@@ -37,9 +37,9 @@ void MAPFPlanner::loadPaths()
     if (initial_success && !initial_run)
     {
         lns->clearAll("Adaptive");
-        //current we simply load future path without push back the unexeuted part
-        lns->loadPaths(future_paths);
-        lns->checkReplan();
+        // //current we simply load future path without push back the unexeuted part
+        // lns->loadPaths(future_paths);
+        // lns->checkReplan();
     }
 }
 
