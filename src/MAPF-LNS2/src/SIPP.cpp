@@ -66,6 +66,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
         }
 
         auto* curr = focal_list.top();
+        //cout<<"loc "<<curr->location<<" goal reached "<<curr->goal_index<<" h "<<curr->h_val<<endl;
         focal_list.pop();
         curr->in_openlist = false;
         num_expanded++;
@@ -77,26 +78,13 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
             break;
         }
         else if ((curr->goal_index > 0 || curr->location == goal_location) && // arrive at the goal location or reach goal before
-                //!curr->wait_at_goal && // not wait at the goal location
-                //curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window) //maybe not stay at current location for larger commit
-                curr->timestep >= commit_window) // the agent can hold the this location afterward until window
+                !curr->wait_at_goal && // not wait at the goal location
+                curr->timestep >= constraint_table.getHoldingTimeForWindow(curr->location, constraint_table.length_min,commit_window) //maybe not stay at current location for larger commit
+                //curr->timestep >= commit_window
+                ) // the agent can hold the this location afterward until window
         {
-            int future_collisions = 0; //disappear does not require to check future collisions
-            if (future_collisions == 0) //agent can stay at goal location
-            {
-                updatePath(curr, path);
-                break;
-            }
-            // generate a goal node
-            auto goal = new SIPPNode(*curr);
-            goal->is_goal = true;
-            goal->h_val = 0;
-            goal->num_of_conflicts += future_collisions;
-            // try to retrieve it from the hash table
-            if (dominanceCheck(goal))
-                pushNodeToFocal(goal);
-            else
-                delete goal;
+            updatePath(curr, path);
+            break;
         }
 
         for (int next_location : instance.getNeighbors(curr->location)) // move to neighboring locations
@@ -108,7 +96,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
                 tie(next_high_generation, next_timestep, next_high_expansion, next_v_collision, next_e_collision) = i;
                 auto holding_time = 0;
                 auto next_collisions = curr->num_of_conflicts + (int)next_v_collision + (int)next_e_collision;
-                auto next_h_val = max(get_heuristic(next_location,goal_location), (next_collisions > 0? holding_time : curr->getFVal()) - next_timestep); // path max
+                auto next_h_val = get_heuristic(next_location,goal_location); // path max
                 
                 int num_goal_reached = curr->goal_index;
                 
@@ -132,7 +120,7 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
                         next_h_val+=get_heuristic(other_goal_locations[i-1],other_goal_locations[i]);
                 }
 
-                int goal_reached = curr->goal_index;
+                //cout<<"next "<<next_location<<" h "<<next_h_val<<" timestep "<<next_timestep<<endl;
                 
                 // generate (maybe temporary) node
                 auto next = new SIPPNode(next_location, next_timestep, next_h_val, curr, next_timestep,
@@ -156,29 +144,29 @@ Path SIPP::findPath(const ConstraintTable& constraint_table, double timeout, boo
                 get<0>(interval) + curr->h_val <= reservation_table.constraint_table.length_max)
         {
             auto next_timestep = get<0>(interval);
-            auto next_h_val = max(get_heuristic(curr->location,goal_location), (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
-            int num_goal_reached = curr->goal_index;
+            // auto next_h_val = max(get_heuristic(curr->location,goal_location), (get<2>(interval) ? holding_time : curr->getFVal()) - next_timestep); // path max
+            // int num_goal_reached = curr->goal_index;
                 
-            if (curr->goal_index > 0)
-            {
-                next_h_val = get_heuristic(curr->location,other_goal_locations[curr->goal_index-1]);
-            }
+            // if (curr->goal_index > 0)
+            // {
+            //     next_h_val = get_heuristic(curr->location,other_goal_locations[curr->goal_index-1]);
+            // }
             
-            //add heursitics for all other goals
-            for (int i = 0; i < other_goal_locations.size(); i++)
-            {
-                if (curr->goal_index-1 >= i)
-                    continue;
-                if (i == 0)
-                    next_h_val+=get_heuristic(goal_location,other_goal_locations[i]);
-                else
-                    next_h_val+=get_heuristic(other_goal_locations[i-1],other_goal_locations[i]);
-            }
+            // //add heursitics for all other goals
+            // for (int i = 0; i < other_goal_locations.size(); i++)
+            // {
+            //     if (curr->goal_index-1 >= i)
+            //         continue;
+            //     if (i == 0)
+            //         next_h_val+=get_heuristic(goal_location,other_goal_locations[i]);
+            //     else
+            //         next_h_val+=get_heuristic(other_goal_locations[i-1],other_goal_locations[i]);
+            // }
 
             auto next_collisions = curr->num_of_conflicts +
                     // (int)curr->collision_v * max(next_timestep - curr->timestep - 1, 0) +
 		    (int)get<2>(interval);
-            auto next = new SIPPNode(curr->location, next_timestep, next_h_val, curr, next_timestep,
+            auto next = new SIPPNode(curr->location, next_timestep, curr->h_val, curr, next_timestep,
                                      get<1>(interval), get<1>(interval), get<2>(interval),
                                      next_collisions, curr->goal_index);
             //next->wait_at_goal = (curr->location == goal_location);
