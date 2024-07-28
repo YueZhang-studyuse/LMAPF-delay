@@ -28,7 +28,10 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
 
     cout<<"window size "<<window_size<<" delay size "<<delays.size()<<" path length "<<paths[0]->size()<<endl;
 
-    for (int t = 0; !unfinished_agents.empty(); t++) {
+    for (int t = 0; !unfinished_agents.empty(); t++) 
+    {
+        if (t > window_size)
+            break;
         cout<<"Similate t = "<<t<<endl;
         auto old_size = unfinished_agents.size();
 
@@ -75,7 +78,9 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
 
     }
 
-    for (int i=0;i<paths.size();i++){
+    for (int i=0;i<paths.size();i++)
+    {
+        path_copy[i].resize(window_size+2);
         *(paths[i]) = path_copy[i];
     }
 

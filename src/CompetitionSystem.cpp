@@ -184,17 +184,10 @@ void BaseSystem::simulate(int simulation_time)
                 planner_movements[k].push_back(Action::NA);
         }   
 
-        curr_plann_timelimit = plan_time_limit;
-
         for (int agent = 0; agent < num_of_agents; agent++) //remove the current position
         {
-            if (curr_commits[agent].size() - 1 > curr_plann_timelimit)
-            {
-                curr_plann_timelimit = curr_commits[agent].size() - 1; //update plan time limit for window i+1
-            }
             curr_commits[agent].erase(curr_commits[agent].begin());
         }
-        cout<<"plan time limit update: "<<curr_plann_timelimit<<endl;
 
         for (int i = 0; i < curr_plann_timelimit; i++)
         {

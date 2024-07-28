@@ -136,7 +136,7 @@ Solution Planner::solve(std::string& additional_info)
     // insert initial node, 'H': high-level node
     auto H_init = new HNode(ins->starts, instance, nullptr, 0, get_h_value(ins->starts));
     OPEN.push(H_init);
-    //EXPLORED[H_init->C] = H_init;
+    // EXPLORED[H_init->C] = H_init;
     EXPLORED[make_pair(H_init->C, H_init->reach_goal)] = H_init;
 
     std::vector<Config> solution;
@@ -149,35 +149,40 @@ Solution Planner::solve(std::string& additional_info)
     {
         // do not pop here!
         auto H = OPEN.top();  // high-level node
-        // low-level search end search tree refers to constraint tree
-        if (H->search_tree.empty()) 
+        if (H->depth > commit_window)
         {
-            OPEN.pop();
-            continue;
+            H_goal = H;
+            break;
         }
+        // // low-level search end search tree refers to constraint tree
+        // if (H->search_tree.empty()) 
+        // {
+        //     OPEN.pop();
+        //     continue;
+        // }
 
 
-        //record the current best, in case no solution found
-        if (curr_best == nullptr)
-            curr_best = H;
-        else
-        {
-            if (curr_best->num_agent_reached < H->num_agent_reached)
-                curr_best = H;
-            if (curr_best->num_agent_reached == H->num_agent_reached && curr_best->depth < H->depth)
-                curr_best = H;
-        }
+        // //record the current best, in case no solution found
+        // if (curr_best == nullptr)
+        //     curr_best = H;
+        // else
+        // {
+        //     if (curr_best->num_agent_reached < H->num_agent_reached)
+        //         curr_best = H;
+        //     if (curr_best->num_agent_reached == H->num_agent_reached && curr_best->depth < H->depth)
+        //         curr_best = H;
+        // }
 
-        // check goal condition -- reach goal once
-        //should all reached the current goal and after that reach the dummy goal
-        if (H_goal == nullptr) 
-        {
-            if (H->num_agent_reached == ins->N)
-            {
-                H_goal = H;
-                break;
-            }
-        }
+        // // check goal condition -- reach goal once
+        // //should all reached the current goal and after that reach the dummy goal
+        // if (H_goal == nullptr) 
+        // {
+        //     if (H->num_agent_reached == ins->N)
+        //     {
+        //         H_goal = H;
+        //         break;
+        //     }
+        // }
 
         // create successors at the low-level search
         auto L = H->search_tree.front();
@@ -208,39 +213,40 @@ Solution Planner::solve(std::string& additional_info)
           num_reached[a->id] = a->goal_index;
         }
 
-        // check explored list
-        //const auto iter = EXPLORED.find(C_new);
-        const auto iter = EXPLORED.find(make_pair(C_new,num_reached));
-        if (iter != EXPLORED.end()) 
-        {
-            // case found
-            rewrite(H, iter->second, H_goal, OPEN);
-            // re-insert or random-restart
-            auto H_insert = (MT != nullptr && get_random_float(MT) >= RESTART_RATE)
-                                ? iter->second
-                                : H_init;
-            if (H_goal == nullptr || H_insert->f < H_goal->f) 
-            {
-                OPEN.push(H_insert);
-            }
-        } 
-        else 
-        {
+        // // check explored list
+        // //const auto iter = EXPLORED.find(C_new);
+        // const auto iter = EXPLORED.find(make_pair(C_new,num_reached));
+        // if (iter != EXPLORED.end()) 
+        // {
+        //     // case found
+        //     rewrite(H, iter->second, H_goal, OPEN);
+        //     // re-insert or random-restart
+        //     auto H_insert = (MT != nullptr && get_random_float(MT) >= RESTART_RATE)
+        //                         ? iter->second
+        //                         : H_init;
+        //     if (H_goal == nullptr || H_insert->f < H_goal->f) 
+        //     {
+        //         OPEN.push(H_insert);
+        //     }
+        // } 
+        // else 
+        // {
             // insert new search node
             const auto H_new = new HNode(C_new, instance, H, H->g + get_edge_cost(H->C, C_new), get_h_value(C_new));
-            //EXPLORED[H_new->C] = H_new;
-            EXPLORED[make_pair(H->C,H->reach_goal)] = H_new;
-            if (H_goal == nullptr || H_new->f < H_goal->f) 
-            {
-                OPEN.push(H_new);
-            }
-        }
+            OPEN.push(H_new);
+            // //EXPLORED[H_new->C] = H_new;
+            // EXPLORED[make_pair(H->C,H->reach_goal)] = H_new;
+            // if (H_goal == nullptr || H_new->f < H_goal->f) 
+            // {
+            //     OPEN.push(H_new);
+            // }
+        // }
     }
 
-    if (H_goal == nullptr)
-    {
-      H_goal = curr_best;
-    }
+    // if (H_goal == nullptr)
+    // {
+    //   H_goal = curr_best;
+    // }
 
     cout<<"num of goal reached "<<H_goal->num_agent_reached<<endl;
 
@@ -355,25 +361,25 @@ bool Planner::get_new_config(HNode* H, LNode* L)
         }
     }
 
-    // add constraints
-    for (uint k = 0; k < L->depth; ++k) 
-    {
-        const auto i = L->who[k];        // agent
-        const auto l = L->where[k]->id;  // loc
+    // // add constraints
+    // for (uint k = 0; k < L->depth; ++k) 
+    // {
+    //     const auto i = L->who[k];        // agent
+    //     const auto l = L->where[k]->id;  // loc
 
-        // check vertex collision
-        if (occupied_next[l] != nullptr) return false;
-        // check swap collision
-        auto l_pre = H->C[i]->id;
-        if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
-            occupied_next[l_pre]->id == occupied_now[l]->id)
-            return false;
-        // set occupied_next
-        A[i]->v_next = L->where[k];
+    //     // check vertex collision
+    //     if (occupied_next[l] != nullptr) return false;
+    //     // check swap collision
+    //     auto l_pre = H->C[i]->id;
+    //     if (occupied_next[l_pre] != nullptr && occupied_now[l] != nullptr &&
+    //         occupied_next[l_pre]->id == occupied_now[l]->id)
+    //         return false;
+    //     // set occupied_next
+    //     A[i]->v_next = L->where[k];
         
-        occupied_next[l] = A[i];
+    //     occupied_next[l] = A[i];
 
-    }
+    // }
 
     // perform PIBT
     for (auto k : H->order) 
