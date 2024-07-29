@@ -401,6 +401,7 @@ void BaseSystem::simulate(int simulation_time)
         // execution with real delays w(i-1) and simulate future moves of w(i)
         execution_simulate(); 
         // add additional waiting from plan exceed time
+        exceed_time = int(planner_times.back()+0.5 - plan_time_limit); //we allow 0.5s exceed time
         for (int i = 0; i < exceed_time; i++)
         {
             timestep++;
@@ -438,8 +439,8 @@ void BaseSystem::simulate(int simulation_time)
                 else
                     actions[agent] = Action::N;
                 curr_commits[agent].erase(curr_commits[agent].begin());
-                if (actions[agent] != Action::WA)
-                    cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
+                // if (actions[agent] != Action::WA)
+                //     cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
             }
             cout<<endl;
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
@@ -882,4 +883,3 @@ void InfAssignSystem::update_tasks()
         }
     }
 }
-

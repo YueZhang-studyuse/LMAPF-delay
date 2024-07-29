@@ -469,6 +469,7 @@ bool LNS::fixInitialSolutionWithLNS2()
         init_lns->commit = commit;
 
         succ = init_lns->run();
+        timeout_flag = init_lns->timeout_flag;
         path_table.reset();
         for (const auto & agent : agents)
         {

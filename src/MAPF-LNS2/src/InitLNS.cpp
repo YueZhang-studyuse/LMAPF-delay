@@ -860,17 +860,17 @@ void InitLNS::printResult()
     // {
     //     cout<<iter.num_of_windowed_colliding_pairs<<",";
     // } 
-    cout <<endl<<"iterations stats (runtime): "<<endl;
-    for (auto iter: iteration_stats)
-    {
-        cout<<iter.runtime<<",";
-    } 
-    cout <<endl<<"iterations stats (sic): "<<endl;
-    for (auto iter: iteration_stats)
-    {
-        cout<<iter.sum_of_costs<<",";
-    } 
-    cout<<endl;
+    // cout <<endl<<"iterations stats (runtime): "<<endl;
+    // for (auto iter: iteration_stats)
+    // {
+    //     cout<<iter.runtime<<",";
+    // } 
+    // cout <<endl<<"iterations stats (sic): "<<endl;
+    // for (auto iter: iteration_stats)
+    // {
+    //     cout<<iter.sum_of_costs<<",";
+    // } 
+    // cout<<endl;
 }
 
 void InitLNS::clear()
