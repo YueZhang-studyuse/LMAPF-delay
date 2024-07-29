@@ -382,16 +382,12 @@ void LNS::checkReplan()
     list<int> complete_agents; // subsets of agents who have complete and collision-free paths
     int makespan = 0;
 
-    instance.existing_path.clear();
-    instance.existing_path.resize(agents.size());
-
-    instance.time_independent_path.clear();
-    instance.time_independent_path.resize(agents.size());
-
     initial_collision = false;
 
     for (auto& agent : agents) //also include delaied agent
     {
+        instance.time_independent_path[agent.id].clear();
+        instance.existing_path[agent.id].clear();
         if (agent.path.empty() || agent.path.front().location != agent.path_planner->start_location)
         {
             if (!agent.path.empty())
@@ -414,56 +410,68 @@ void LNS::checkReplan()
             }
             if (!reached_goal) 
             {
+                cout<<"not reach goal "<<agent.id<<endl;
                 neighbor.agents.emplace_back(agent.id);
                 agent.path.clear();
             }
-            bool has_collision = false;
-            for (auto other : complete_agents)
+            else
             {
-                has_collision = instance.hasCollision(agent.path, agents[other].path);
-                if (has_collision)
+                bool has_collision = false;
+                for (auto other : complete_agents)
                 {
-                    //neighbor.agents.emplace_back(agent.id);
-                    initial_collision = true;
-                    //agent.path.clear(); do not clear path, use this as initial solution to lns2
-                    break;
+                    has_collision = instance.hasCollision(agent.path, agents[other].path);
+                    if (has_collision)
+                    {
+                        //neighbor.agents.emplace_back(agent.id);
+                        initial_collision = true;
+                        //agent.path.clear(); do not clear path, use this as initial solution to lns2
+                        break;
+                    }
                 }
-            }
-            if (!has_collision)
-            {
-                path_table.insertPath(agent.id, agent.path);
-                complete_paths++;
-                initial_sum_of_costs += (int)agent.path.size() - 1;
-                complete_agents.emplace_back(agent.id);
-                makespan = max(makespan, (int)agent.path.size() - 1);
+                if (!has_collision)
+                {
+                    path_table.insertPath(agent.id, agent.path);
+                    complete_paths++;
+                    initial_sum_of_costs += (int)agent.path.size() - 1;
+                    complete_agents.emplace_back(agent.id);
+                    makespan = max(makespan, (int)agent.path.size() - 1);
 
-                instance.existing_path[agent.id].resize(agent.path.size());
+                    for (int i = 0; i < (int)agent.path.size(); i++)
+                    {
+                        instance.existing_path[agent.id].push_back(agent.path[i].location);
+                    }
+                }
+
+                cout<<"agent origin: "<<agent.id<< " goal "<<agent.path_planner->goal_location<<":";
+
+                unordered_map<int,int>locs;
                 for (int i = 0; i < (int)agent.path.size(); i++)
                 {
-                    instance.existing_path[agent.id][i] = agent.path[i].location;
-                }
-            }
-
-            unordered_map<int,int>locs;
-            for (int i = 0; i < (int)agent.path.size(); i++)
-            {
-                if (locs.find(agent.path[i].location) == locs.end())
-                {
-                    locs[agent.path[i].location] = i;
-                }
-                else
-                {
-                    if (locs[agent.path[i].location] < i)
+                    if (locs.find(agent.path[i].location) == locs.end())
                     {
                         locs[agent.path[i].location] = i;
                     }
+                    else
+                    {
+                        if (locs[agent.path[i].location] < i)
+                        {
+                            locs[agent.path[i].location] = i;
+                        }
+                    }
+                    cout<<" "<<agent.path[i].location;
                 }
-            }
-            for (int i = 0; i < (int)agent.path.size(); i++)
-            {
-                int loc = agent.path[i].location;
-                i = locs[agent.path[i].location];
-                instance.time_independent_path[i].push_back(loc);
+                cout<<endl;
+
+                cout<<"agent: "<<agent.id;
+
+                for (int i = 0; i < (int)agent.path.size(); i++)
+                {
+                    int loc = agent.path[i].location;
+                    i = locs[agent.path[i].location];
+                    instance.time_independent_path[agent.id].push_back(loc);
+                    cout<<" "<<loc;
+                }
+                cout<<endl;
             }
         }
     }
