@@ -76,6 +76,8 @@ public:
 		// {
 		int h_2 = getTimeIndependentHeuristics(agent,loc);
 		// }
+		if (goal != env->goal_locations[agent].front().first)
+			h_2 = 0;
 		int h_3 = getAllpairDistance(loc,goal);
 		return make_tuple(h_1,h_2,h_3);
 	}
