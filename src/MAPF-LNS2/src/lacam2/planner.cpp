@@ -88,7 +88,12 @@ HNode::HNode(const Config& _C, const Instance& I, HNode* _parent, const uint _g,
   // set order
   std::iota(order.begin(), order.end(), 0);
   std::sort(order.begin(), order.end(),
-            [&](uint i, uint j) { return priorities[i] > priorities[j]; });
+            [&](uint i, uint j) 
+            { 
+                if (I.getTimeDepdentHeuristics(i,C[i]->index,curr_time) == I.getTimeDepdentHeuristics(j,C[j]->index,curr_time))
+                    return priorities[i] > priorities[j]; 
+                return I.getTimeDepdentHeuristics(i,C[i]->index,curr_time) < I.getTimeDepdentHeuristics(j,C[j]->index,curr_time);
+            });
 }
 
 HNode::~HNode()
@@ -411,16 +416,18 @@ bool Planner::funcPIBT(LACAMAgent* ai)
     int goal_loc =instance.env->goal_locations[i][ai->goal_index].first;
     // ai->reached_goal ? instance.getDummyGoals()[i] : instance.env->goal_locations[i][0].first;
     //sort
-    std::sort(C_next[i].begin(), C_next[i].begin() + K + 1,
-              [&](Vertex* const v, Vertex* const u) 
-              {
-                  // return D.get(i, v) + tie_breakers[v->id] <
-                  //       D.get(i, u) + tie_breakers[u->id];
-                  return instance.getAllpairDistance(goal_loc,v->index) + tie_breakers[v->id] <
-                          instance.getAllpairDistance(goal_loc,u->index) + tie_breakers[u->id];
-              });
+    std::sort(C_next[i].begin(), C_next[i].begin() + K + 1, 
+    [&](Vertex* const v, Vertex* const u) 
+    {
+        auto h_v = instance.getGuidanceDistance(i,v->index,goal_loc,ai->curr_timestep);
+        auto h_u = instance.getGuidanceDistance(i,u->index,goal_loc,ai->curr_timestep);
+        if (h_v == h_u)
+            return tie_breakers[v->id] < tie_breakers[u->id];
+        return h_v < h_u;
+    });
 
-    swap_agent = swap_possible_and_required(ai);
+    if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep) != 0)
+        swap_agent = swap_possible_and_required(ai);
 
     if (swap_agent != nullptr)
     {
@@ -518,13 +525,9 @@ bool Planner::is_swap_required(const uint pusher, const uint puller,
     auto v_pusher = v_pusher_origin;
     auto v_puller = v_puller_origin;
     int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
-    //A[pusher]->reached_goal ? instance.getAllpairDistance(ins->dummy_goals[pusher]->index, v_puller->index) : D.get(pusher, v_puller);
     int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
-    //A[pusher]->reached_goal ? instance.getAllpairDistance(ins->dummy_goals[pusher]->index, v_pusher->index) : D.get(pusher, v_pusher);
     int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
-    //A[puller]->reached_goal ? instance.getAllpairDistance(ins->dummy_goals[puller]->index, v_puller->index) : D.get(puller, v_puller);
     int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
-    //A[puller]->reached_goal ? instance.getAllpairDistance(ins->dummy_goals[puller]->index, v_pusher->index) : D.get(puller, v_pusher);
 
 
     Vertex* tmp = nullptr;
@@ -554,10 +557,6 @@ bool Planner::is_swap_required(const uint pusher, const uint puller,
         v_pusher = v_puller;
         v_puller = tmp;
 
-        // int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
-        // int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
-        // int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
-        // int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
         int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
         int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
         int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);

@@ -475,6 +475,8 @@ void LNS::checkReplan()
             }
         }
     }
+
+    instance.initGuidanceHeuristics();
     if (screen == 2)
         cout << complete_agents.size() << " collision-free agents at timestep " << makespan << endl;
 }

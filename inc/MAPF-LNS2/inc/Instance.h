@@ -13,9 +13,30 @@ public:
 	// int num_of_cols;
 	// int num_of_rows;
 	// int map_size;
+	struct Node
+	{
+		int location;
+		int value;
+
+		Node() = default;
+		Node(int location, int value) : location(location), value(value) {}
+		// the following is used to compare nodes in the OPEN list
+		struct compare_node
+		{
+			// returns true if n1 > n2 (note -- this gives us *min*-heap).
+			bool operator()(const Node& n1, const Node& n2) const
+			{
+				return n1.value >= n2.value;
+			}
+		};  // used by OPEN (heap) to compare nodes (top of the heap has min f-val, and then highest g-val)
+	};
 
 	SharedEnvironment* env;
 	vector<vector<int>> heuristic;
+
+	mutable vector<vector<int>> guidance_heuristic;
+	mutable vector<std::queue<Node>> OPEN;
+
 	//save map degree - for assigning goals
 	vector<int> degrees = {0,0,0,0};
 
@@ -24,6 +45,33 @@ public:
 
 	//for allpair heuristics
 	void computeAllPair();
+	int getTimeIndependentHeuristics(int agent, int loc) const;
+	void initGuidanceHeuristics() const;
+
+	int getTimeDepdentHeuristics(int agent, int loc, int t) const
+	{
+		if (t >= existing_path[agent].size())
+			return 1;
+		if (existing_path[agent][t] == loc)
+			return 0;
+		return 1;
+	}
+
+	tuple<int,int,int> getGuidanceDistance(int agent, int loc, int goal, int t) const
+	{
+		int h_1 = getTimeDepdentHeuristics(agent,loc,t);
+		int h_2;
+		if (goal != env->goal_locations[agent].front().first) //not the first goal, then it's free to go to other locations
+		{
+			h_2 = 0;
+		}
+		else
+		{
+			h_2 = getTimeIndependentHeuristics(agent,loc);
+		}
+		int h_3 = getAllpairDistance(loc,goal);
+		return make_tuple(h_1,h_2,h_3);
+	}
 
 	void prepareDummy();
 

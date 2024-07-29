@@ -133,24 +133,6 @@ void Instance::computeAllPair()
     cout<<"computing all pair"<<endl;
     heuristic.resize(env->map.size());
 
-    struct Node
-	{
-		int location;
-		int value;
-
-		Node() = default;
-		Node(int location, int value) : location(location), value(value) {}
-		// the following is used to compare nodes in the OPEN list
-		struct compare_node
-		{
-			// returns true if n1 > n2 (note -- this gives us *min*-heap).
-			bool operator()(const Node& n1, const Node& n2) const
-			{
-				return n1.value >= n2.value;
-			}
-		};  // used by OPEN (heap) to compare nodes (top of the heap has min f-val, and then highest g-val)
-	};
-
     for (int i = 0; i < heuristic.size(); i++)
     {
         if (env->map[i] == 1)
@@ -204,6 +186,56 @@ void Instance::computeAllPair()
 	// 	myfile << std::endl;
 	// }
 	// myfile.close();
+}
+
+int Instance::getTimeIndependentHeuristics(int agent, int loc) const
+{
+	if (guidance_heuristic[agent].empty()) //no guidance path
+        return MAX_TIMESTEP;
+	if (guidance_heuristic[agent][loc] < MAX_TIMESTEP)
+		return guidance_heuristic[agent][loc];
+	//expand by bfs
+	while (!OPEN[agent].empty()) 
+    {
+        Node n = OPEN[agent].front();
+		//cout<<"expanding "<<n.location<<endl;
+        OPEN[agent].pop();
+		int d_n = guidance_heuristic[agent][n.location];
+		for (int next_location : getNeighbors(n.location))
+		{
+			int d_m = guidance_heuristic[agent][next_location];
+			if (d_n + 1 >= d_m) continue;
+			guidance_heuristic[agent][next_location] = d_n + 1;
+			Node next(next_location, d_n + 1);
+			OPEN[agent].push(next);
+		}
+        if (n.location == loc)
+			return d_n;
+    }
+    return MAX_TIMESTEP;
+}
+
+void Instance::initGuidanceHeuristics() const
+{
+	guidance_heuristic.clear();
+	guidance_heuristic.resize(env->num_of_agents);
+	OPEN.clear();
+	for (size_t i = 0; i < env->num_of_agents; i++) 
+	{
+		if (time_independent_path[i].empty())
+            continue;
+		guidance_heuristic[i] = std::vector<int>(env->map.size(), MAX_TIMESTEP);
+
+		OPEN.push_back(std::queue<Node>());
+		for (int t = 0; t < time_independent_path[i].size();t++)
+		{
+			int loc = time_independent_path[i][t];
+			//cout<<"loc "<<loc;
+			Node root(loc, 0); //compute every node to i
+        	guidance_heuristic[i][loc] = abs((int)time_independent_path[i].size()-1-t);
+        	OPEN[i].push(root);  // add root to heap
+		}
+	}
 }
 
 // bool Instance::validateSolution(const vector<Path*>& paths, int sum_of_costs, int num_of_colliding_pairs) const
