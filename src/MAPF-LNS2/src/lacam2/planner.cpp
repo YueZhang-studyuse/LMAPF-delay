@@ -161,6 +161,8 @@ Solution Planner::solve(std::string& additional_info)
             continue;
         }
 
+        cout<<"current node "<<H->depth<<" goal reached "<<H->num_agent_reached<<endl;
+
 
         //record the current best, in case no solution found
         if (curr_best == nullptr)
@@ -386,7 +388,7 @@ bool Planner::get_new_config(HNode* H, LNode* L)
         if (is_expired(deadline)) return false; //timeout
 
         auto a = A[k];
-        if (a->v_next == nullptr && !funcPIBT(a))
+        if (a->v_next == nullptr && !funcPIBT(a,true))
         {
             return false;  // planning failure
         }
@@ -395,10 +397,19 @@ bool Planner::get_new_config(HNode* H, LNode* L)
     return true;
 }
 
-bool Planner::funcPIBT(LACAMAgent* ai)
+bool Planner::funcPIBT(LACAMAgent* ai, bool first)
 {
     const auto i = ai->id;
     const auto K = ai->v_now->neighbor.size();
+    // cout<<" curr "<<ai->v_now->index<<" curr on guidance "<<instance.getTimeDepdentHeuristics(i,ai->v_now->index,ai->curr_timestep)<<endl;
+
+    //if ai is first agent and from guidance path it should wait
+    if (first && instance.getTimeDepdentHeuristics(i,ai->v_now->index,ai->curr_timestep+1) == 0 && occupied_next[ai->v_now->id] == nullptr)
+    {
+        occupied_next[ai->v_now->id] = ai;
+        ai->v_next = ai->v_now;
+        return true;
+    }
 
     // get candidates for next locations
     for (auto k = 0; k < K; ++k) 
@@ -419,15 +430,15 @@ bool Planner::funcPIBT(LACAMAgent* ai)
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1, 
     [&](Vertex* const v, Vertex* const u) 
     {
-        auto h_v = instance.getGuidanceDistance(i,v->index,goal_loc,ai->curr_timestep);
-        auto h_u = instance.getGuidanceDistance(i,u->index,goal_loc,ai->curr_timestep);
+        auto h_v = instance.getGuidanceDistance(i,v->index,goal_loc,ai->curr_timestep+1);
+        auto h_u = instance.getGuidanceDistance(i,u->index,goal_loc,ai->curr_timestep+1);
         if (h_v == h_u)
             return tie_breakers[v->id] < tie_breakers[u->id];
         return h_v < h_u;
     });
 
-    if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep) != 0)
-        swap_agent = swap_possible_and_required(ai);
+    // if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep+1) != 0)
+    //     swap_agent = swap_possible_and_required(ai);
 
     if (swap_agent != nullptr)
     {
@@ -458,7 +469,7 @@ bool Planner::funcPIBT(LACAMAgent* ai)
         ai->v_next = u;
 
         // priority inheritance
-        if (ak != nullptr && ak != ai && ak->v_next == nullptr && !funcPIBT(ak))
+        if (ak != nullptr && ak != ai && ak->v_next == nullptr && !funcPIBT(ak,first))
           continue;
 
         // success to plan next one step

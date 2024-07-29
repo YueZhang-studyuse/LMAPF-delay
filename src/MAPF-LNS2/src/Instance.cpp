@@ -9,6 +9,7 @@ void Instance::initMap(SharedEnvironment* simulate_env)
     env = simulate_env;
     existing_path.resize(env->num_of_agents);
     time_independent_path.resize(env->num_of_agents);
+    guidance_heuristic.resize(env->num_of_agents);
 }
 
 void Instance::prepareDummy()
@@ -222,17 +223,18 @@ void Instance::initGuidanceHeuristics() const
 	OPEN.clear();
 	for (size_t i = 0; i < env->num_of_agents; i++) 
 	{
+        OPEN.push_back(std::queue<Node>());
 		if (time_independent_path[i].empty())
+        {
             continue;
+        }
 		guidance_heuristic[i] = std::vector<int>(env->map.size(), MAX_TIMESTEP);
-
-		OPEN.push_back(std::queue<Node>());
 		for (int t = 0; t < time_independent_path[i].size();t++)
 		{
 			int loc = time_independent_path[i][t];
 			//cout<<"loc "<<loc;
-			Node root(loc, 0); //compute every node to i
-        	guidance_heuristic[i][loc] = abs((int)time_independent_path[i].size()-1-t);
+            guidance_heuristic[i][loc] = abs((int)time_independent_path[i].size()-1-t);
+			Node root(loc, guidance_heuristic[i][loc]); //compute every node to i
         	OPEN[i].push(root);  // add root to heap
 		}
 	}

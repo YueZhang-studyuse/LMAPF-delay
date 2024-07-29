@@ -54,7 +54,7 @@ int main(int argc, char **argv)
         ("delayPolicy", po::value<int>()->default_value(1), "delay execution plolcy, 1-MCP, 2-Casual PIBT, 3-Time Dependent PIBT")
         ("delaySimulateAll", po::value<bool>()->default_value(true), "whether load simulate all path with dummy simulation");
     //test
-    //./lifelong --inputFile ../lifelong_benchmark/random/agent-300_scen-delay-0.005-1.json --simulationTime 10 -c 3 --mapfPlanner 3 --delayPolicy 3  --delaySimulateAll false -l log.txt -o test_3_pibtd.json --planTimeLimit 3  >test_3_pibtd.txt
+    //./lifelong --inputFile ../lifelong_benchmark/random/agent-400_scen-delay-0.004-1.json --simulationTime 100 -c 3 --mapfPlanner 2 --delayPolicy 3  --delaySimulateAll false -l log.txt -o test_3_pibtd.json --planTimeLimit 3  >test_3_pibtd.txt
 
     clock_t start_time = clock();
     po::store(po::parse_command_line(argc, argv, desc), vm);

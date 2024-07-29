@@ -410,7 +410,7 @@ void LNS::checkReplan()
             }
             if (!reached_goal) 
             {
-                cout<<"not reach goal "<<agent.id<<endl;
+                // cout<<"not reach goal "<<agent.id<<endl;
                 neighbor.agents.emplace_back(agent.id);
                 agent.path.clear();
             }
@@ -442,7 +442,7 @@ void LNS::checkReplan()
                     }
                 }
 
-                cout<<"agent origin: "<<agent.id<< " goal "<<agent.path_planner->goal_location<<":";
+                // cout<<"agent origin: "<<agent.id<< " goal "<<agent.path_planner->goal_location<<":";
 
                 unordered_map<int,int>locs;
                 for (int i = 0; i < (int)agent.path.size(); i++)
@@ -458,20 +458,20 @@ void LNS::checkReplan()
                             locs[agent.path[i].location] = i;
                         }
                     }
-                    cout<<" "<<agent.path[i].location;
+                    // cout<<" "<<agent.path[i].location;
                 }
-                cout<<endl;
+                // cout<<endl;
 
-                cout<<"agent: "<<agent.id;
+                // cout<<"agent: "<<agent.id;
 
                 for (int i = 0; i < (int)agent.path.size(); i++)
                 {
                     int loc = agent.path[i].location;
                     i = locs[agent.path[i].location];
                     instance.time_independent_path[agent.id].push_back(loc);
-                    cout<<" "<<loc;
+                    // cout<<" "<<loc;
                 }
-                cout<<endl;
+                // cout<<endl;
             }
         }
     }
@@ -541,13 +541,13 @@ bool LNS::fixInitialSolutionWithLaCAM()
         auto succ = getInitialSolution();
         if (succ)
         {
-            initial_sum_of_costs += neighbor.sum_of_costs;
+            // initial_sum_of_costs += neighbor.sum_of_costs;
             sum_of_costs = initial_sum_of_costs;
             return true;
         }
         else
         {
-            initial_sum_of_costs += neighbor.sum_of_costs;
+            // initial_sum_of_costs += neighbor.sum_of_costs;
             sum_of_costs = initial_sum_of_costs;
             cout<<"lacam failed"<<endl;
             return false;
@@ -719,6 +719,8 @@ bool LNS::runLACAM2()
                 break;
             }
         }
+        if (reached_goal_time < commit)
+            reached_goal_time = commit;
 
         if (reached_goal_time == -1 || reached_goal_time < commit)
         {
