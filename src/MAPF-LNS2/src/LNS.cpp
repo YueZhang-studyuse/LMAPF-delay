@@ -354,11 +354,6 @@ bool LNS::fixInitialSolution()
                 complete_agents.emplace_back(agent.id);
                 makespan = max(makespan, (int)agent.path.size() - 1);
             }
-            instance.existing_path[agent.id].resize(agent.path.size());
-            for (int i = 0; i < (int)agent.path.size(); i++)
-            {
-                instance.existing_path[agent.id][i] = agent.path[i].location;
-            }
         }
     }
     if (screen == 2)
@@ -386,6 +381,12 @@ void LNS::checkReplan()
     initial_sum_of_costs = 0;
     list<int> complete_agents; // subsets of agents who have complete and collision-free paths
     int makespan = 0;
+
+    instance.existing_path.clear();
+    instance.existing_path.resize(agents.size());
+
+    instance.time_independent_path.clear();
+    instance.time_independent_path.resize(agents.size());
 
     initial_collision = false;
 
@@ -435,6 +436,34 @@ void LNS::checkReplan()
                 initial_sum_of_costs += (int)agent.path.size() - 1;
                 complete_agents.emplace_back(agent.id);
                 makespan = max(makespan, (int)agent.path.size() - 1);
+
+                instance.existing_path[agent.id].resize(agent.path.size());
+                for (int i = 0; i < (int)agent.path.size(); i++)
+                {
+                    instance.existing_path[agent.id][i] = agent.path[i].location;
+                }
+            }
+
+            unordered_map<int,int>locs;
+            for (int i = 0; i < (int)agent.path.size(); i++)
+            {
+                if (locs.find(agent.path[i].location) == locs.end())
+                {
+                    locs[agent.path[i].location] = i;
+                }
+                else
+                {
+                    if (locs[agent.path[i].location] < i)
+                    {
+                        locs[agent.path[i].location] = i;
+                    }
+                }
+            }
+            for (int i = 0; i < (int)agent.path.size(); i++)
+            {
+                int loc = agent.path[i].location;
+                i = locs[agent.path[i].location];
+                instance.time_independent_path[i].push_back(loc);
             }
         }
     }

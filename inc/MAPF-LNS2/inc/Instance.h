@@ -20,6 +20,7 @@ public:
 	vector<int> degrees = {0,0,0,0};
 
 	mutable vector<vector<int>> existing_path;
+	mutable vector<vector<int>> time_independent_path;
 
 	//for allpair heuristics
 	void computeAllPair();
