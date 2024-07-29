@@ -54,8 +54,11 @@ public:
 		// {
 		// 	cout<<"existing "<<existing_path[agent][t]<<" current "<<loc<<" agent "<<agent <<endl;
 		// }
-		// if (t >= existing_path[agent].size())
+		if (t >= existing_path[agent].size())
 			return MAX_TIMESTEP;
+		if (existing_path[agent][t] == loc)
+			return 0;
+		return MAX_TIMESTEP;
 		// //if (existing_path[agent][t] == loc)
 		// 	// getAllpairDistance(existing_path[agent][t],loc);
 		// return getAllpairDistance(existing_path[agent][t],loc);;
@@ -63,18 +66,16 @@ public:
 
 	tuple<int,int,int> getGuidanceDistance(int agent, int loc, int goal, int t) const
 	{
-		int h_1 = 1;
-		getTimeDepdentHeuristics(agent,loc,t);
-		int h_2 = 0;
+		int h_1 = getTimeDepdentHeuristics(agent,loc,t);
+		// int h_2 = 0;
 		// if (goal != env->goal_locations[agent].front().first) //not the first goal, then it's free to go to other locations
 		// {
 		// 	h_2 = 0;
 		// }
 		// else
 		// {
-		// 	h_2 = getTimeIndependentHeuristics(agent,loc);
+		int h_2 = getTimeIndependentHeuristics(agent,loc);
 		// }
-		h_2 = getTimeIndependentHeuristics(agent,loc);
 		int h_3 = getAllpairDistance(loc,goal);
 		return make_tuple(h_1,h_2,h_3);
 	}

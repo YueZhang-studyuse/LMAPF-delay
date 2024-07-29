@@ -161,7 +161,7 @@ Solution Planner::solve(std::string& additional_info)
             continue;
         }
 
-        cout<<"current node "<<H->depth<<" goal reached "<<H->num_agent_reached<<endl;
+        //cout<<"current node "<<H->depth<<" goal reached "<<H->num_agent_reached<<endl;
 
 
         //record the current best, in case no solution found
@@ -401,7 +401,7 @@ bool Planner::funcPIBT(LACAMAgent* ai, bool first)
 {
     const auto i = ai->id;
     const auto K = ai->v_now->neighbor.size();
-    // cout<<" curr "<<ai->v_now->index<<" curr on guidance "<<instance.getTimeDepdentHeuristics(i,ai->v_now->index,ai->curr_timestep)<<endl;
+    //cout<<" curr "<<ai->v_now->index<<" curr on guidance "<<instance.getTimeDepdentHeuristics(i,ai->v_now->index,ai->curr_timestep)<<endl;
 
     //if ai is first agent and from guidance path it should wait
     if (first && instance.getTimeDepdentHeuristics(i,ai->v_now->index,ai->curr_timestep+1) == 0 && occupied_next[ai->v_now->id] == nullptr)
@@ -437,8 +437,8 @@ bool Planner::funcPIBT(LACAMAgent* ai, bool first)
         return h_v < h_u;
     });
 
-    // if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep+1) != 0)
-    //     swap_agent = swap_possible_and_required(ai);
+    if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep+1) != 0)
+        swap_agent = swap_possible_and_required(ai);
 
     if (swap_agent != nullptr)
     {
@@ -523,28 +523,10 @@ LACAMAgent* Planner::swap_possible_and_required(LACAMAgent* ai)
 bool Planner::is_swap_required(const uint pusher, const uint puller,
                                Vertex* v_pusher_origin, Vertex* v_puller_origin)
 {
-
-    auto pusher_goal = instance.env->goal_locations[pusher][A[pusher]->goal_index].first;
-    //A[pusher]->reached_goal ? instance.getDummyGoals()[pusher] : instance.env->goal_locations[pusher][0].first;
-    auto puller_goal = instance.env->goal_locations[pusher][A[puller]->goal_index].first;
-    //A[puller]->reached_goal ? instance.getDummyGoals()[puller] : instance.env->goal_locations[puller][0].first;
-    if (pusher_goal == puller_goal)
-    {
-        return false; //no need to swap with same goal
-    }
-    
     auto v_pusher = v_pusher_origin;
     auto v_puller = v_puller_origin;
-    int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
-    int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
-    int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
-    int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
-
-
     Vertex* tmp = nullptr;
-    //while (D.get(pusher, v_puller) < D.get(pusher, v_pusher)) {
-      //while ((!A[pusher]->reached_goal && A[puller]->reached_goal) || (!A[pusher]->reached_goal && !A[puller]->reached_goal && pusher_vpuller < pusher_vpusher)) {
-    while ((pusher_vpuller < pusher_vpusher)) 
+    while (instance.getTimeIndependentHeuristics(pusher, v_puller->index) < instance.getTimeIndependentHeuristics(pusher, v_pusher->index)) 
     {
         auto n = v_puller->neighbor.size();
         // remove agents who need not to move
@@ -561,22 +543,75 @@ bool Planner::is_swap_required(const uint pusher, const uint puller,
                 tmp = u;
             }
         }
-
         if (n >= 2) return false;  // able to swap
         if (n <= 0) break;
-
         v_pusher = v_puller;
         v_puller = tmp;
-
-        int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
-        int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
-        int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
-        int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
     }
 
-    return (puller_vpusher < puller_vpuller) &&
-            (pusher_vpusher == 0 || pusher_vpuller < pusher_vpusher);
+    // judge based on distance
+    return (instance.getTimeIndependentHeuristics(puller, v_pusher->index) < instance.getTimeIndependentHeuristics(puller, v_puller->index)) &&
+          (instance.getTimeIndependentHeuristics(pusher, v_pusher->index) == 0 || instance.getTimeIndependentHeuristics(pusher, v_puller->index) < instance.getTimeIndependentHeuristics(pusher, v_pusher->index));
 }
+
+// // simulate whether the swap is required
+// bool Planner::is_swap_required(const uint pusher, const uint puller,
+//                                Vertex* v_pusher_origin, Vertex* v_puller_origin)
+// {
+
+//     auto pusher_goal = instance.env->goal_locations[pusher][A[pusher]->goal_index].first;
+//     //A[pusher]->reached_goal ? instance.getDummyGoals()[pusher] : instance.env->goal_locations[pusher][0].first;
+//     auto puller_goal = instance.env->goal_locations[pusher][A[puller]->goal_index].first;
+//     //A[puller]->reached_goal ? instance.getDummyGoals()[puller] : instance.env->goal_locations[puller][0].first;
+//     if (pusher_goal == puller_goal)
+//     {
+//         return false; //no need to swap with same goal
+//     }
+    
+//     auto v_pusher = v_pusher_origin;
+//     auto v_puller = v_puller_origin;
+//     int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
+//     int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
+//     int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
+//     int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
+
+
+//     Vertex* tmp = nullptr;
+//     //while (D.get(pusher, v_puller) < D.get(pusher, v_pusher)) {
+//       //while ((!A[pusher]->reached_goal && A[puller]->reached_goal) || (!A[pusher]->reached_goal && !A[puller]->reached_goal && pusher_vpuller < pusher_vpusher)) {
+//     while ((pusher_vpuller < pusher_vpusher)) 
+//     {
+//         auto n = v_puller->neighbor.size();
+//         // remove agents who need not to move
+//         for (auto u : v_puller->neighbor) 
+//         {
+//             auto a = occupied_now[u->id];
+//             if (u == v_pusher ||
+//                 (u->neighbor.size() == 1 && a != nullptr && ins->goals[a->id] == u)) 
+//             {
+//                 --n;
+//             } 
+//             else 
+//             {
+//                 tmp = u;
+//             }
+//         }
+
+//         if (n >= 2) return false;  // able to swap
+//         if (n <= 0) break;
+
+//         v_pusher = v_puller;
+//         v_puller = tmp;
+
+//         int pusher_vpuller = instance.getAllpairDistance(pusher_goal,v_puller->index);
+//         int pusher_vpusher = instance.getAllpairDistance(pusher_goal,v_pusher->index);
+//         int puller_vpuller = instance.getAllpairDistance(puller_goal,v_puller->index);
+//         int puller_vpusher = instance.getAllpairDistance(puller_goal,v_pusher->index);
+//     }
+
+//     return (puller_vpusher < puller_vpuller) &&
+//             (pusher_vpusher == 0 || pusher_vpuller < pusher_vpusher);
+// }
 
 // simulate whether the swap is possible
 bool Planner::is_swap_possible(Vertex* v_pusher_origin, Vertex* v_puller_origin)
