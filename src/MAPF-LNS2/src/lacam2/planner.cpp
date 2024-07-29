@@ -430,6 +430,10 @@ bool Planner::funcPIBT(LACAMAgent* ai, bool first)
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1, 
     [&](Vertex* const v, Vertex* const u) 
     {
+        if (u == nullptr && v != nullptr)
+            return true;
+        if (v == nullptr)
+            return false;
         auto h_v = instance.getGuidanceDistance(i,v->index,goal_loc,ai->curr_timestep+1);
         auto h_u = instance.getGuidanceDistance(i,u->index,goal_loc,ai->curr_timestep+1);
         if (h_v == h_u)
