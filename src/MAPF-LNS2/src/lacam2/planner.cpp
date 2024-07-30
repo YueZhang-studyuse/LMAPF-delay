@@ -431,24 +431,11 @@ bool Planner::funcPIBT(LACAMAgent* ai, bool first)
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1, 
     [&](Vertex* const v, Vertex* const u) 
     {
-        int h_v;
-        int h_u;
-
-        h_v = instance.getTimeDepdentHeuristics(i,v->index,ai->curr_timestep+1);
-        h_u = instance.getTimeDepdentHeuristics(i,u->index,ai->curr_timestep+1);
-
-        if (h_v != h_u)
-            return h_v < h_u;
-        if (ai->goal_index == 0 && (v && u))
-        {
-            h_v = instance.getTimeIndependentHeuristics(i,v->index);
-            h_u = instance.getTimeIndependentHeuristics(i,u->index);
-            if (h_v != h_u)
-                return h_v<h_u;
-        }
-        h_v = instance.getAllpairDistance(v->index,goal_loc);
-        h_u = instance.getAllpairDistance(u->index,goal_loc);
-        return h_v + tie_breakers[v->id] < h_u + tie_breakers[u->id];
+        auto h_v = instance.getGuidanceDistance(i,v->index,goal_loc,ai->curr_timestep+1);
+        auto h_u = instance.getGuidanceDistance(i,u->index,goal_loc,ai->curr_timestep+1);
+        if (h_v == h_u)
+            return tie_breakers[v->id] < tie_breakers[u->id];
+        return h_v < h_u;
     });
 
     if (instance.getTimeDepdentHeuristics(i,C_next[i][0]->index,ai->curr_timestep+1) != 0)
