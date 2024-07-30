@@ -427,16 +427,19 @@ bool Planner::funcPIBT(LACAMAgent* ai, bool first)
     int goal_loc =instance.env->goal_locations[i][ai->goal_index].first;
     // ai->reached_goal ? instance.getDummyGoals()[i] : instance.env->goal_locations[i][0].first;
     //sort
+    //cout<<"starting sort "<<K + 1<<endl;
     std::sort(C_next[i].begin(), C_next[i].begin() + K + 1, 
     [&](Vertex* const v, Vertex* const u) 
     {
         int h_v;
         int h_u;
+
         h_v = instance.getTimeDepdentHeuristics(i,v->index,ai->curr_timestep+1);
         h_u = instance.getTimeDepdentHeuristics(i,u->index,ai->curr_timestep+1);
+
         if (h_v != h_u)
             return h_v < h_u;
-        if (ai->goal_index == 0)
+        if (ai->goal_index == 0 && (v && u))
         {
             h_v = instance.getTimeIndependentHeuristics(i,v->index);
             h_u = instance.getTimeIndependentHeuristics(i,u->index);

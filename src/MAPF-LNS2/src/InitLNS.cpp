@@ -330,7 +330,7 @@ bool InitLNS::getInitialSolution()
     for (auto id : neighbor.agents)
     {
         bool timeout = false;
-        agents[id].path = agents[id].path_planner->findPath(constraint_table,time_limit,timeout);
+        agents[id].path = agents[id].path_planner->findPath(constraint_table,(double)MAX_COST,timeout);
         //assert(!agents[id].path.empty() && agents[id].path.back().location == agents[id].path_planner->goal_location);
         if (agents[id].path_planner->num_collisions > 0)
             updateCollidingPairs(colliding_pairs, agents[id].id, agents[id].path);
@@ -860,17 +860,17 @@ void InitLNS::printResult()
     // {
     //     cout<<iter.num_of_windowed_colliding_pairs<<",";
     // } 
-    cout <<endl<<"iterations stats (runtime): "<<endl;
-    for (auto iter: iteration_stats)
-    {
-        cout<<iter.runtime<<",";
-    } 
-    cout <<endl<<"iterations stats (sic): "<<endl;
-    for (auto iter: iteration_stats)
-    {
-        cout<<iter.sum_of_costs<<",";
-    } 
-    cout<<endl;
+    // cout <<endl<<"iterations stats (runtime): "<<endl;
+    // for (auto iter: iteration_stats)
+    // {
+    //     cout<<iter.runtime<<",";
+    // } 
+    // cout <<endl<<"iterations stats (sic): "<<endl;
+    // for (auto iter: iteration_stats)
+    // {
+    //     cout<<iter.sum_of_costs<<",";
+    // } 
+    // cout<<endl;
 }
 
 void InitLNS::clear()

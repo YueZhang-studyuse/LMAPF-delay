@@ -42,11 +42,16 @@ public:
 
 	mutable vector<vector<int>> existing_path;
 	mutable vector<vector<int>> time_independent_path;
+	mutable vector<vector<int>> second_guidance_heuristic; //agent id <loc>
 
 	//for allpair heuristics
 	void computeAllPair();
 	int getTimeIndependentHeuristics(int agent, int loc) const;
 	void initGuidanceHeuristics() const;
+	int getSecondGuidanceDistance(int agent, int loc) const
+	{
+		return second_guidance_heuristic[agent][loc];
+	}
 
 	int getTimeDepdentHeuristics(int agent, int loc, int t) const
 	{
@@ -209,4 +214,3 @@ private:
 	  // Class  SingleAgentSolver can access private members of Node 
 	  friend class SingleAgentSolver;
 };
-

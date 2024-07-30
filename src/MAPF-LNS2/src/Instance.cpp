@@ -10,6 +10,7 @@ void Instance::initMap(SharedEnvironment* simulate_env)
     existing_path.resize(env->num_of_agents);
     time_independent_path.resize(env->num_of_agents);
     guidance_heuristic.resize(env->num_of_agents);
+    second_guidance_heuristic.resize(env->num_of_agents);
 }
 
 void Instance::prepareDummy()
@@ -194,7 +195,9 @@ int Instance::getTimeIndependentHeuristics(int agent, int loc) const
 	if (guidance_heuristic[agent].empty()) //no guidance path
         return MAX_TIMESTEP;
 	if (guidance_heuristic[agent][loc] < MAX_TIMESTEP)
-		return guidance_heuristic[agent][loc];
+    {
+        return guidance_heuristic[agent][loc] +  + second_guidance_heuristic[agent][loc];
+    }
 	//expand by bfs
 	while (!OPEN[agent].empty()) 
     {
@@ -207,11 +210,12 @@ int Instance::getTimeIndependentHeuristics(int agent, int loc) const
 			int d_m = guidance_heuristic[agent][next_location];
 			if (d_n + 1 >= d_m) continue;
 			guidance_heuristic[agent][next_location] = d_n + 1;
+            second_guidance_heuristic[agent][next_location] = second_guidance_heuristic[agent][n.location];
 			Node next(next_location, d_n + 1);
 			OPEN[agent].push(next);
 		}
         if (n.location == loc)
-			return d_n;
+			return d_n + second_guidance_heuristic[agent][n.location];
     }
     return MAX_TIMESTEP;
 }
@@ -229,12 +233,14 @@ void Instance::initGuidanceHeuristics() const
             continue;
         }
 		guidance_heuristic[i] = std::vector<int>(env->map.size(), MAX_TIMESTEP);
+        second_guidance_heuristic[i] = std::vector<int>(env->map.size(), MAX_TIMESTEP);
 		for (int t = 0; t < time_independent_path[i].size();t++)
 		{
 			int loc = time_independent_path[i][t];
 			//cout<<"loc "<<loc;
-            guidance_heuristic[i][loc] = abs((int)time_independent_path[i].size()-1-t);
-			Node root(loc, guidance_heuristic[i][loc]); //compute every node to i
+			Node root(loc, 0); //compute every node to i
+        	guidance_heuristic[i][loc] = 0;
+			second_guidance_heuristic[i][loc] = abs((int)time_independent_path[i].size()-1-t);
         	OPEN[i].push(root);  // add root to heap
 		}
 	}
