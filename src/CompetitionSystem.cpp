@@ -470,7 +470,7 @@ void BaseSystem::simulate(int simulation_time)
                     env->unexecuted_paths[i].push_back(curr_commits[i][t]);
                 }
             }
-            else if (delay_policy != 1)
+            else if (planner->mapf_planner != 3) //we load all path for lacam
             {
                 for (int t = commit_window-1; t < curr_commits[i].size(); t++)
                 {
