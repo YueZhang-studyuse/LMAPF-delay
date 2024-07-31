@@ -470,17 +470,29 @@ void BaseSystem::simulate(int simulation_time)
                     env->unexecuted_paths[i].push_back(curr_commits[i][t]);
                 }
             }
-            else
+            else if (delay_policy != 1)
             {
-                // bool first = true;
+                for (int t = commit_window-1; t < curr_commits[i].size(); t++)
+                {
+                    env->unexecuted_paths[i].push_back(curr_commits[i][t]);
+                }
+                bool first = true;
                 env->unexecuted_paths[i].clear();
                 for (auto loc: planner->future_paths[i])
                 {
-                    // if (first)
-                    // {
-                    //     first = false;
-                    //     continue;
-                    // }
+                    if (first)
+                    {
+                        first = false;
+                        continue;
+                    }
+                    env->unexecuted_paths[i].push_back(PathEntry(loc));
+                }
+            }
+            else
+            {
+                env->unexecuted_paths[i].clear();
+                for (auto loc: planner->future_paths[i])
+                {
                     env->unexecuted_paths[i].push_back(PathEntry(loc));
                 }
             }
