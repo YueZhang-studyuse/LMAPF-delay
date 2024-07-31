@@ -472,12 +472,12 @@ void BaseSystem::simulate(int simulation_time)
             }
             else if (planner->mapf_planner != 3) //we load all path for lacam
             {
+                env->unexecuted_paths[i].clear();
                 for (int t = commit_window-1; t < curr_commits[i].size(); t++)
                 {
                     env->unexecuted_paths[i].push_back(curr_commits[i][t]);
                 }
                 bool first = true;
-                env->unexecuted_paths[i].clear();
                 for (auto loc: planner->future_paths[i])
                 {
                     if (first)
