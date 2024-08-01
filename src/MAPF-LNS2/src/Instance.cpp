@@ -196,7 +196,7 @@ int Instance::getTimeIndependentHeuristics(int agent, int loc) const
         return MAX_TIMESTEP;
 	if (guidance_heuristic[agent][loc] < MAX_TIMESTEP)
     {
-        return guidance_heuristic[agent][loc] +  + second_guidance_heuristic[agent][loc];
+        return guidance_heuristic[agent][loc] + second_guidance_heuristic[agent][loc];
     }
 	//expand by bfs
 	while (!OPEN[agent].empty()) 
