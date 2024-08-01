@@ -417,6 +417,16 @@ void LNS::checkReplan()
             else
             {
                 bool has_collision = false;
+                bool invalid = false;
+                for (int t = 1; t < (int) agent.path.size(); t++ )
+                {
+                    if (!instance.validMove(agent.path[t - 1].location, agent.path[t].location))
+                    {
+                        invalid = true;
+                        //cout<<"invalid "<<" "<<agent.path[t - 1].location<<" "<<agent.path[t].location<<endl;
+                        break;
+                    }
+                }
                 for (auto other : complete_agents)
                 {
                     has_collision = instance.hasCollision(agent.path, agents[other].path);
@@ -428,7 +438,7 @@ void LNS::checkReplan()
                         break;
                     }
                 }
-                if (!has_collision)
+                if (!has_collision && !invalid)
                 {
                     path_table.insertPath(agent.id, agent.path);
                     complete_paths++;
@@ -439,13 +449,15 @@ void LNS::checkReplan()
                     for (int i = 0; i < (int)agent.path.size(); i++)
                     {
                         instance.existing_path[agent.id].push_back(agent.path[i].location);
+                        if (agent.path[i].location == agent.path_planner->goal_location && i >= commit)
+                            break;
                     }
                 }
 
                 // cout<<"agent origin: "<<agent.id<< " goal "<<agent.path_planner->goal_location<<":";
 
                 unordered_map<int,int>locs;
-                for (int i = 0; i < (int)agent.path.size(); i++)
+                for (int i = 1; i < (int)agent.path.size(); i++) //don't push start
                 {
                     if (locs.find(agent.path[i].location) == locs.end())
                     {
@@ -459,19 +471,23 @@ void LNS::checkReplan()
                         }
                     }
                     // cout<<" "<<agent.path[i].location;
+                    if (agent.path[i].location == agent.path_planner->goal_location && i >= commit)
+                        break;
                 }
                 // cout<<endl;
 
-                // cout<<"agent: "<<agent.id;
+                //cout<<"agent: "<<agent.id;
 
-                for (int i = 0; i < (int)agent.path.size(); i++)
+                for (int i = 1; i < (int)agent.path.size(); i++)
                 {
                     int loc = agent.path[i].location;
                     i = locs[agent.path[i].location];
                     instance.time_independent_path[agent.id].push_back(loc);
-                    // cout<<" "<<loc;
+                    //cout<<" "<<loc;
+                    if (agent.path[i].location == agent.path_planner->goal_location && i >= commit)
+                        break;
                 }
-                // cout<<endl;
+                //cout<<endl;
             }
         }
     }
@@ -719,8 +735,10 @@ bool LNS::runLACAM2()
                 break;
             }
         }
-        if (reached_goal_time < commit)
-            reached_goal_time = commit;
+        if (reached_goal_time == -1)
+            succ = false;
+        // if (reached_goal_time < commit)
+        //     reached_goal_time = commit;
 
         if (reached_goal_time == -1 || reached_goal_time < commit)
         {
@@ -737,14 +755,14 @@ bool LNS::runLACAM2()
         }
         else
         {
-            agents[agent].path.resize(reached_goal_time+1);
-            for (size_t t = 0; t <= reached_goal_time; t++)
-            {
-                auto curr_loc = solution[t][agent]->index;
-                agents[agent].path[t].location = curr_loc;
-            }
-            path_table.insertPath(agents[agent].id, agents[agent].path);
-            soc+=agents[agent].path.size()-1;
+        agents[agent].path.resize(reached_goal_time+1);
+        for (size_t t = 0; t <= reached_goal_time; t++)
+        {
+            auto curr_loc = solution[t][agent]->index;
+            agents[agent].path[t].location = curr_loc;
+        }
+        path_table.insertPath(agents[agent].id, agents[agent].path);
+        soc+=agents[agent].path.size()-1;
         }
 
     }
