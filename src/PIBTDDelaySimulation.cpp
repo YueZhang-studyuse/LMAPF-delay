@@ -29,7 +29,7 @@ void SimulatePIBTD::simulate(const vector<vector<bool>> & delays)
     // for (int a = 0; a < agents.size(); a++)
     // {
     //     cout<<"agent a "<<a<<" path: ";
-    //     for (auto p: unexecuted_path[a])
+    //     for (auto p: time_dependent_path[a])
     //     {
     //         cout<<p<<" ";
     //     }
@@ -82,6 +82,12 @@ void SimulatePIBTD::simulate(const vector<vector<bool>> & delays)
         }
         else
         {
+            occupy_next.clear();
+            for (int a = 0; a < agents.size();a++)
+            {
+                //cout<<"propose a "<<a<<" loc "<<agents[a]->v_next<<endl;
+                occupy_next[agents[a]->v_next] = a;
+            }
             for (int a = 0; a < agents.size(); a++) //we can simply skip direct delay/direct wait from execution
             {
                 if (agents[a]->v_next == agents[a]->v_now)
@@ -109,7 +115,7 @@ void SimulatePIBTD::simulate(const vector<vector<bool>> & delays)
     }
     // for (int a = 0; a < agents.size(); a++)
     // {
-    //     cout<<"agent a "<<a<<" path: ";
+    //     cout<<"agent a "<<a<<" simu path: ";
     //     for (auto p: simulated_path[a])
     //     {
     //         cout<<p<<" ";
@@ -134,6 +140,16 @@ bool SimulatePIBTD::funcPIBT(Agent* ai, bool first) //return move or not
     if (first)
         next.push_back(ai->v_now);
     int loc_on_guidance = time_dependent_path[ai->id][ai->internal_time+1];
+
+    if (!first)
+    {
+        if (ai->v_now == loc_on_guidance) //guidacnce is wait
+        {
+            ai->v_next = from;
+            occupy_next[from] = ai->id;
+            return false;
+        }
+    }
 
     std::sort(next.begin(), next.end(),
         [&](int i, int j) 

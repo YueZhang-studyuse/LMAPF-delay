@@ -298,7 +298,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
-                //cout<<"result delay "<<i<<endl;
+                cout<<"result delay "<<i<<endl;
                 return false;
             }
         }

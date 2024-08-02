@@ -439,8 +439,8 @@ void BaseSystem::simulate(int simulation_time)
                 else
                     actions[agent] = Action::N;
                 curr_commits[agent].erase(curr_commits[agent].begin());
-                if (actions[agent] != Action::WA)
-                    cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
+                // if (actions[agent] != Action::WA)
+                //     cout<<"current agent: "<<agent<<" move: "<<actions[agent]<<" ";
             }
             cout<<endl;
             list<Task> new_finished_tasks = move(actions); //record task finishes (from real exe)
