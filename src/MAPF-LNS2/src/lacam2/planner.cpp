@@ -377,8 +377,9 @@ bool Planner::get_new_config(HNode* H, LNode* L)
             return false;
         // set occupied_next
         A[i]->v_next = L->where[k];
-        
-        occupied_next[l] = A[i];
+
+        if (A[i]->goal_index == 0 || H->depth < commit_window)
+            occupied_next[l] = A[i];
 
     }
 
@@ -498,7 +499,7 @@ LACAMAgent* Planner::swap_possible_and_required(LACAMAgent* ai)
 
     // usual swap situation, c.f., case-a, b
     auto aj = occupied_now[C_next[i][0]->id];
-    if (aj != nullptr && aj->v_next == nullptr &&
+    if (aj != nullptr && aj->v_next == nullptr && //aj->goal_index == 0 &&
         is_swap_required(ai->id, aj->id, ai->v_now, aj->v_now) &&
         is_swap_possible(aj->v_now, ai->v_now)) 
     {
@@ -509,7 +510,8 @@ LACAMAgent* Planner::swap_possible_and_required(LACAMAgent* ai)
     for (auto u : ai->v_now->neighbor) 
     {
         auto ak = occupied_now[u->id];
-        if (ak == nullptr || C_next[i][0] == ak->v_now) continue;
+        if (ak == nullptr || C_next[i][0] == ak->v_now //|| ak->goal_index > 0
+        ) continue;
         if (is_swap_required(ak->id, ai->id, ai->v_now, C_next[i][0]) &&
             is_swap_possible(C_next[i][0], ai->v_now)) 
         {

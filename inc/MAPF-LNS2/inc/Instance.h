@@ -59,10 +59,10 @@ public:
 		// {
 		// 	cout<<"existing "<<existing_path[agent][t]<<" current "<<loc<<" agent "<<agent <<endl;
 		// }
-		if (t >= existing_path[agent].size())
-			return MAX_TIMESTEP;
-		if (existing_path[agent][t] == loc)
-			return 0;
+		// if (t >= existing_path[agent].size())
+		// 	return MAX_TIMESTEP;
+		// if (existing_path[agent][t] == loc)
+		// 	return 0;
 		return MAX_TIMESTEP;
 		// //if (existing_path[agent][t] == loc)
 		// 	// getAllpairDistance(existing_path[agent][t],loc);
