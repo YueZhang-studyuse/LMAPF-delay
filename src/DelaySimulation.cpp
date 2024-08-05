@@ -75,7 +75,20 @@ void SimulateMCP::simulate(vector<Path*>& paths, const vector<vector<bool>> & de
 
     }
 
-    for (int i=0;i<paths.size();i++){
+    for (int i=0;i<path_copy.size();i++)
+    {
+        int t = path_copy[i].size()-1;
+        while (t > window_size+1)
+        {
+            if (path_copy[i][t].location != path_copy[i][t-1].location)
+                break;
+            t--;
+        }
+        path_copy[i].resize(t+1);
+    }
+
+    for (int i=0;i<paths.size();i++)
+    {
         *(paths[i]) = path_copy[i];
     }
 
