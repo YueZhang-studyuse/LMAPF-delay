@@ -423,6 +423,7 @@ void LNS::checkReplan()
                     if (!instance.validMove(agent.path[t - 1].location, agent.path[t].location))
                     {
                         invalid = true;
+                        initial_collision = true;
                         //cout<<"invalid "<<" "<<agent.path[t - 1].location<<" "<<agent.path[t].location<<endl;
                         break;
                     }
@@ -735,8 +736,6 @@ bool LNS::runLACAM2()
                 break;
             }
         }
-        if (reached_goal_time == -1)
-            succ = false;
         if (reached_goal_time < commit && reached_goal_time >= 0)
             reached_goal_time = commit;
 
