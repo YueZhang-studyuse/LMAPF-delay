@@ -737,10 +737,10 @@ bool LNS::runLACAM2()
         }
         if (reached_goal_time == -1)
             succ = false;
-        // if (reached_goal_time < commit)
-        //     reached_goal_time = commit;
+        if (reached_goal_time < commit && reached_goal_time >= 0)
+            reached_goal_time = commit;
 
-        if (reached_goal_time == -1 || reached_goal_time < commit)
+        if (reached_goal_time == -1)
         {
             agents[agent].path.resize(solution.size());
             for (size_t t = 0; t <= solution.size() - 1; t++)
@@ -755,14 +755,14 @@ bool LNS::runLACAM2()
         }
         else
         {
-        agents[agent].path.resize(reached_goal_time+1);
-        for (size_t t = 0; t <= reached_goal_time; t++)
-        {
-            auto curr_loc = solution[t][agent]->index;
-            agents[agent].path[t].location = curr_loc;
-        }
-        path_table.insertPath(agents[agent].id, agents[agent].path);
-        soc+=agents[agent].path.size()-1;
+            agents[agent].path.resize(reached_goal_time+1);
+            for (size_t t = 0; t <= reached_goal_time; t++)
+            {
+                auto curr_loc = solution[t][agent]->index;
+                agents[agent].path[t].location = curr_loc;
+            }
+            path_table.insertPath(agents[agent].id, agents[agent].path);
+            soc+=agents[agent].path.size()-1;
         }
 
     }
