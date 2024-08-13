@@ -149,19 +149,22 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
     {
         paths_copy[i].push_back(paths_copy[i].back());
         ++p;
+        num_delay_insert++;
         cout<<"find delaied "<<i<<endl;
         return false;
     }
 
     // if t is in the window, 
-    if (t <= window_size){
+    if (t <= window_size)
+    {
         // cout<<"check if collision at "<< t <<" for "<< i <<endl;
         // cout<<"time "<<(float)clock()/(float)CLOCKS_PER_SEC<<endl;
 
         if (previous == loc && 
         copy_mcp[loc].begin()->count(i) &&
         std::next(copy_mcp[loc].begin()) != copy_mcp[loc].end() &&
-        std::next(copy_mcp[loc].begin())->size() > 1){
+        std::next(copy_mcp[loc].begin())->size() > 1)
+        {
             paths_copy[i].push_back(paths_copy[i].back());
             ++p;
             // cout <<"["<< i <<",wv(a)],";
@@ -169,7 +172,8 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             return false;
         }
         //and next location record more than one agent in top of mcp (vertex conflict may occur), then wait
-        else if (copy_mcp[loc].front().size() > 1){
+        else if (copy_mcp[loc].front().size() > 1)
+        {
             paths_copy[i].push_back(paths_copy[i].back());
             ++p;
             // cout <<"["<< i <<",wv],";
@@ -183,7 +187,8 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
             (std::next(copy_mcp[previous].begin()) != copy_mcp[previous].end()) &&
             (std::next(copy_mcp[loc].begin())!= copy_mcp[loc].end() )&&
             ((*std::next(copy_mcp[loc].begin())).count(i) > 0)
-        ){
+        )
+        {
             //check if the first agents a of next loc is at loc, and want to move to previous loc (the second agents of previous include a)
             for (auto a : copy_mcp[loc].front()){
                 // cout << "check edge conflict for "<< a << endl;
@@ -298,6 +303,7 @@ bool SimulateMCP::moveAgent(vector<Path>& paths_copy, vector<Path*>& paths, list
                     copy_mcp[previous].front().insert(i);
                 ++p;
                 // cout <<"["<< i <<",rf],";
+                num_delay_insert++;
                 cout<<"result delay "<<i<<endl;
                 return false;
             }

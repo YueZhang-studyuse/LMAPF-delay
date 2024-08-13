@@ -248,6 +248,7 @@ void SimulatePIBT::delayAgents(int a, int t)
 {
     //cout<<"delaying "<<a<<" at "<<t<<endl;
     //delay itself
+    num_delay_insert++;
     agents[a]->v_next = agents[a]->v_now;
     simulated_path[a].push_back(agents[a]->v_next);
     agents[a]->delay++;

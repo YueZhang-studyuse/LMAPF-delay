@@ -20,6 +20,12 @@ public:
     int delay_policy = 1;
     bool delay_simulate_all = true;
 
+    list<int> num_delays;
+    list<double> replanner_time;
+    list<int> replanner_cost;
+    list<bool> replanner_succ;
+    list<int> delay_replan_need;
+
     vector<vector<bool>> simulation_delay;
 
 	BaseSystem(Grid &grid, MAPFPlanner* planner, ActionModel* model):

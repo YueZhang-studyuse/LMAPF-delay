@@ -39,4 +39,10 @@ public:
     mapf_algo algo = mapf_algo::LACAMLNS2;
 
     int mapf_planner;
+
+    int replan_solution_cost = MAX_TIMESTEP;
+    double replan_time = 0;
+    bool replan_succss = false;
+    int delay_replan_needed = 0;
+
 };

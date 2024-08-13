@@ -6,32 +6,9 @@
 
 class SimulateMCP {
 public:
-    // struct Decision
-    // {
-    //     std::string type;
-    //     std::string color;
-    //     int x;
-    //     int y;
-    //     int move_tox = -1;
-    //     int move_toy = -1;
-    //     int prior_order = -1;
-    //     int agent_id;
-    //     int delay_by = -1;
-    //     Decision(std::string dtype, int dx, int dy, int did, string c)
-    //     {
-    //         type = dtype;
-    //         x = dx;
-    //         y = dy;
-    //         agent_id = did;
-    //         color = c;
-    //     }
-    // };
-
-    // int map_col = 32;
-
-    // std::list<Decision> decisions;
 
     int window_size = 1;
+    int num_delay_insert = 0;
 
     vector<int> to_go;
 

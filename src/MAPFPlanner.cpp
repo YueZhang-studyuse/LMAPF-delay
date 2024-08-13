@@ -34,17 +34,24 @@ void MAPFPlanner::initialize(int preprocess_time_limit)
 
 void MAPFPlanner::loadPaths()
 {
+    lns->replan_needed = 0;
+    delay_replan_needed = 0;
     if (initial_success && !initial_run)
     {
         lns->clearAll("Adaptive");
         //current we simply load future path without push back the unexeuted part
         lns->loadPaths(env->unexecuted_paths);
         lns->checkReplan();
+        delay_replan_needed = lns->replan_needed;
     }
 }
 
 void MAPFPlanner::plan(int time_limit) 
 {
+    replan_time = (double)time_limit;
+    replan_solution_cost = MAX_TIMESTEP;
+    replan_succss = false;
+
     if (algo == mapf_algo::LACAM)
     {
         lns->setRuntimeLimit(time_limit);
@@ -97,7 +104,11 @@ void MAPFPlanner::plan(int time_limit)
         else 
         {
             lns->setRuntimeLimit(time_limit);
-            lns->fixInitialSolutionWithLaCAM();
+            replan_succss = lns->fixInitialSolutionWithLaCAM();
+            replan_time = lns->initial_solution_runtime;
+            if (replan_succss)
+                replan_solution_cost = lns->initial_sum_of_costs;
+            
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();
@@ -131,7 +142,10 @@ void MAPFPlanner::plan(int time_limit)
             //lns->clearAll("Adaptive");
             //lns->loadPaths(future_paths);
             lns->setRuntimeLimit(time_limit);
-            lns->fixInitialSolutionWithLNS2();
+            replan_succss = lns->fixInitialSolutionWithLNS2();
+            replan_time = lns->initial_solution_runtime;
+            if (replan_succss)
+                replan_solution_cost = lns->initial_sum_of_costs;
             lns->has_initial_solution = true;
             lns->setIterations(MAX_TIMESTEP); 
             lns->run();

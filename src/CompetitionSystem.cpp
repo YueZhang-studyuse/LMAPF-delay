@@ -241,6 +241,7 @@ void BaseSystem::execution_simulate()
         postmcp.window_size = commit_window;
         postmcp.build(temp);
         postmcp.simulate(temp,delay);
+        num_delays.push_back(postmcp.num_delay_insert);
         postmcp.clear();
     }
     else if (delay_policy == 2)
@@ -260,6 +261,7 @@ void BaseSystem::execution_simulate()
                 index++;
             }
         }
+        num_delays.push_back(postpibt.num_delay_insert);
         postpibt.clear();
     }
     else if (delay_policy == 3)
@@ -279,6 +281,7 @@ void BaseSystem::execution_simulate()
                 index++;
             }
         }
+        num_delays.push_back(postpibt.num_delay_insert);
         postpibt.clear();
     }
 
@@ -393,6 +396,11 @@ void BaseSystem::simulate(int simulation_time)
         planner_times.push_back(std::chrono::duration<double>(diff).count());
         //commit k
         planner->planner_commit(curr_commits); //push back the curr commits
+        replanner_time.push_back(planner->replan_time);
+        replanner_cost.push_back(planner->replan_solution_cost);
+        replanner_succ.push_back(planner->replan_succss);
+        delay_replan_need.push_back(planner->delay_replan_needed);
+        
         //}
 
         //*** execution component ***
@@ -779,7 +787,56 @@ void BaseSystem::saveResults(const string &fileName, const bool outputSimple) co
     std::ofstream f(fileName,std::ios_base::trunc |std::ios_base::out);
     f << std::setw(4) << js;
 
+    //cout other things
+    double replan_succ_count = 0;
+    for (auto i: replanner_succ)
+    {
+        if (i) 
+        {
+            replan_succ_count+=1;
+        }
+    }
+    double sum_delays = 0;
+    cout<<"delays insert ";
+    for (auto i: num_delays)
+    {
+        sum_delays+= (double) i;
+        cout<<i<<" ";
+    }
+    cout<<endl<<"replan time ";
+    double sum_time;
+    for (auto i: replanner_time)
+    {
+        sum_time+=i;
+        cout<<i<<" ";
+    }
+    cout<<endl<<"replan cost ";
+    double sum_cost;
+    int cnt;
+    for (auto i: replanner_cost)
+    {
+        if (i!=MAX_TIMESTEP)
+        {
+            sum_cost+= (double) i;
+            cnt++;
+        }
+        cout<<i<<" ";
+    }
+    cout<<endl<<"replan due to delay ";
+    double sum_delay_replan;
+    for (auto i: delay_replan_need)
+    {
+        sum_delay_replan+= (double) i;
+        cout<<i<<" ";
+    }
+    cout<<endl<<" success rate "<<replan_succ_count/replanner_succ.size()<<endl;
+    cout<<"avg delay insert "<<sum_delays/num_delays.size()<<endl;
+    cout<<"avg replan time "<<sum_time/replanner_time.size()<<endl;
+    cout<<"avg replan cost"<<sum_cost/cnt<<endl;
+    cout<<"avg replan due to delay"<<sum_delay_replan/delay_replan_need.size()<<endl;
+
 }
+
 
 bool FixedAssignSystem::load_agent_tasks(string fname)
 {

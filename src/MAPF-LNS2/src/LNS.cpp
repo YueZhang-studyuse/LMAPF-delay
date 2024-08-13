@@ -393,6 +393,7 @@ void LNS::checkReplan()
             if (!agent.path.empty())
             {
                 cout<<"replan for agent "<<agent.id<<" due to delaies "<<agent.path.front().location<<" "<<agent.path_planner->start_location<<endl;
+                replan_needed++;
             }
             neighbor.agents.emplace_back(agent.id);
             agent.path.clear();
@@ -453,6 +454,10 @@ void LNS::checkReplan()
                         if (agent.path[i].location == agent.path_planner->goal_location && i >= commit)
                             break;
                     }
+                }
+                else
+                {
+                    replan_needed++;
                 }
 
                 // cout<<"agent origin: "<<agent.id<< " goal "<<agent.path_planner->goal_location<<":";
@@ -552,10 +557,11 @@ bool LNS::fixInitialSolutionWithLaCAM()
 {
     if (!neighbor.agents.empty() || initial_collision)
     {
-        start_time = Time::now();
         clearAll("Adaptive");
+        start_time = Time::now();
         cout<<"Fix Solution with LACAM"<<endl;
         auto succ = getInitialSolution();
+        initial_solution_runtime = ((fsec)(Time::now() - start_time)).count();
         if (succ)
         {
             // initial_sum_of_costs += neighbor.sum_of_costs;

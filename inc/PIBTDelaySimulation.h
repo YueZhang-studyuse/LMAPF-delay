@@ -25,6 +25,8 @@ public:
         }
     };
 
+    int num_delay_insert = 0;
+
     //vector<list<int>> unexecuted_path;
     vector<vector<int>> time_independent_path;
     vector<vector<int>> simulated_path;

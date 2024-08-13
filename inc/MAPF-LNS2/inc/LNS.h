@@ -29,6 +29,8 @@ public:
     int restart_times = 0;
     int complete_paths = 0;
     int delete_timesteps = 0;
+
+    int replan_needed = 0;
     
     // LNS(const Instance& instance, double time_limit,
     //     string  init_algo_name, string  replan_algo_name, const string & destory_name,

@@ -208,6 +208,7 @@ bool SimulatePIBTD::funcPIBT(Agent* ai, bool first) //return move or not
 void SimulatePIBTD::delayAgents(int a, int t)
 {
     cout<<"delaying "<<a<<" at "<<t<<endl;
+    num_delay_insert++;
     //delay itself
     agents[a]->v_next = agents[a]->v_now;
     simulated_path[a].push_back(agents[a]->v_next);
