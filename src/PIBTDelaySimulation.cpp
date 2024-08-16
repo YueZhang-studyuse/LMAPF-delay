@@ -82,7 +82,16 @@ void SimulatePIBT::simulate(const vector<vector<bool>> & delays)
             for (int a = 0; a < agents.size(); a++)
             {
                 simulated_path[a].push_back(agents[a]->v_next);
-                agents[a]->internal_time = agents[a]->proposed_time;
+                //agents[a]->internal_time = agents[a]->proposed_time;
+                for (int t_temp = agents[a]->internal_time+1; t_temp < time_independent_path[a].size()-1; t_temp++)
+                {
+                    if (time_independent_path[a][t_temp] == agents[a]->v_now)
+                    {
+                        agents[a]->internal_time = t_temp;
+                        //cout<<agents[a]->internal_time<<" "<<time_independent_path[a].size()<<endl;
+                        //break;
+                    }
+                }
             }
         }
         else
@@ -108,13 +117,14 @@ void SimulatePIBT::simulate(const vector<vector<bool>> & delays)
                 {
                     //cout<<"move exe"<<endl;
                     simulated_path[a].push_back(agents[a]->v_next);
-                    // agents[a]->internal_time = agents[a]->proposed_time;
-                    for (t = agents[a]->internal_time+1; t < time_independent_path[a].size(); t++)
+                    //agents[a]->internal_time = agents[a]->proposed_time;
+                    for (int t_temp = agents[a]->internal_time+1; t_temp < time_independent_path[a].size()-1; t_temp++)
                     {
-                        if (time_independent_path[a][t] == agents[a]->v_next)
+                        if (time_independent_path[a][t_temp] == agents[a]->v_now)
                         {
-                            agents[a]->internal_time = t;
-                            break;
+                            agents[a]->internal_time = t_temp;
+                            //cout<<agents[a]->internal_time<<" "<<time_independent_path[a].size()<<endl;
+                            //break;
                         }
                     }
                 }
