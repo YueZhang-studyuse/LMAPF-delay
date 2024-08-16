@@ -108,7 +108,15 @@ void SimulatePIBT::simulate(const vector<vector<bool>> & delays)
                 {
                     //cout<<"move exe"<<endl;
                     simulated_path[a].push_back(agents[a]->v_next);
-                    agents[a]->internal_time = agents[a]->proposed_time;
+                    // agents[a]->internal_time = agents[a]->proposed_time;
+                    for (t = agents[a]->internal_time+1; t < time_independent_path[a].size(); t++)
+                    {
+                        if (time_independent_path[a][t] == agents[a]->v_next)
+                        {
+                            agents[a]->internal_time;
+                            break;
+                        }
+                    }
                 }
             }
         }
