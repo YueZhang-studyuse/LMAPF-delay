@@ -113,7 +113,7 @@ void SimulatePIBT::simulate(const vector<vector<bool>> & delays)
                     {
                         if (time_independent_path[a][t] == agents[a]->v_next)
                         {
-                            agents[a]->internal_time;
+                            agents[a]->internal_time = t;
                             break;
                         }
                     }
